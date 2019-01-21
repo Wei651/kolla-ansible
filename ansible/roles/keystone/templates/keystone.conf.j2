@@ -72,3 +72,23 @@ connection_string = {{ osprofiler_backend_connection_string }}
 [cors]
 allowed_origin = {{ public_protocol }}://{{ kolla_external_fqdn | put_address_in_context('url') }}:{{ grafana_server_port }}
 {% endif %}
+
+{% if should_use_oidc or should_use_saml %}
+[federation]
+{% for dashboard in horizon_trusted_dashboards %}
+trusted_dashboard = {{ dashboard }}
+{% endfor %}
+
+sso_callback_template = /etc/keystone/sso_callback_template.html
+
+#SAML configuration
+[mapped]
+remote_id_attribute = {{remote_id_attribute_saml}}
+
+#configuration for OpenID Connect
+[openid]
+remote_id_attribute = {{remote_id_attribute_oidc}}
+
+[auth]
+methods = external,password,token,mapped,openid
+{% endif %}

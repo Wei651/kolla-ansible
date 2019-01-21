@@ -1,0 +1,87 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This module creates a list of cron intervals for a node in a group of nodes
+# to ensure each node runs a cron in round robbin style.
+
+import json
+import re
+import requests
+import sys
+
+if sys.version_info[0] < 3:
+    from urllib import quote_plus
+else:
+    from urllib.parse import quote_plus
+
+
+def main(argv):
+    certificate_transformer = None
+    key_transformer = certificate_transformer
+
+    metadata_folder = "{{ host_keystone_federation_oidc_metadata_folder }}"
+    cert_folder = "{{ host_keystone_federation_oidc_idp_certificate_folder }}"
+
+    idp_url = argv[0]
+    client_id = argv[1]
+    client_secret = argv[2]
+    certificate = argv[3]
+    key_id = argv[4]
+    if len(argv) > 5:
+        certificate_transformer = argv[5]
+        if len(argv) > 6:
+            key_transformer = argv[6]
+
+    file_name = quote_plus(re.sub("https?://", "", idp_url))
+    json_provider_url = idp_url + '/.well-known/openid-configuration'
+
+    json_provider = json.dumps(requests.get(json_provider_url).json())
+    # This variable is an empty json because we are not overriding any configuration
+    # and the apache2 OIDC plugin needs an existing config file with a valid json,
+    # even if this JSON is an empty one.
+    json_conf = {}
+    json_client = json.dumps({'client_id': client_id, 'client_secret': client_secret})
+
+    key_id = get_value_by_url(key_id)
+    certificate = get_value_by_url(certificate)
+
+    if key_transformer:
+        key_id = eval(key_transformer)
+    if certificate_transformer:
+        certificate = eval(certificate_transformer)
+
+    create_file(metadata_folder, file_name, "provider", json_provider)
+    create_file(metadata_folder, file_name, "client", json_client)
+    create_file(metadata_folder, file_name, "conf", json_conf)
+    create_file(cert_folder, key_id, "pem", certificate)
+
+    print(key_id)
+
+
+def create_file(file_path, file_name, extension, content):
+    path = "%s/%s.%s" % (file_path, file_name, extension)
+    with open(path, "w") as file:
+        file.write(str(content))
+
+
+def get_value_by_url(url):
+    if 'http' in url:
+        return requests.get(url)._content.decode("utf-8")
+    if 'file' in url:
+        with open(url.replace("file://",""), "r") as file:
+            return file.read().decode("utf-8")
+
+    return url
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
