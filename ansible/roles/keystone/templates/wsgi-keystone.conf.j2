@@ -38,6 +38,37 @@ LogLevel info
     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
     CustomLog "{{ keystone_log_dir }}/keystone-apache-public-access.log" logformat
     {{ keystone_wsgi_public_vhost_config | indent(4) }}
+
+    {% if should_use_oidc %}
+    OIDCClaimPrefix "OIDC-"
+    OIDCResponseType "id_token"
+    OIDCScope "openid email profile"
+    OIDCMetadataDir {{container_keystone_federation_oidc_metadata_folder}}
+    OIDCOAuthVerifyCertFiles {{ certificate_key_ids }}
+
+    OIDCCryptoPassphrase {{oidc_crypto_passphrase}}
+
+    OIDCRedirectURI {{keystone_public_url}}/redirect_uri
+
+    <Location ~ "/redirect_uri">
+      AuthType auth-openidc
+      Require valid-user
+      LogLevel debug
+    </Location>
+
+
+    <LocationMatch /auth/OS-FEDERATION/identity_providers/.*?/protocols/openid/websso>
+      AuthType openid-connect
+      Require valid-user
+      LogLevel debug
+    </LocationMatch>
+
+    <LocationMatch /OS-FEDERATION/identity_providers/.*?/protocols/openid/auth>
+      AuthType auth-openidc
+      Require valid-user
+      LogLevel debug
+    </LocationMatch>
+    {% endif %}
 </VirtualHost>
 
 <VirtualHost *:{{ keystone_admin_listen_port }}>

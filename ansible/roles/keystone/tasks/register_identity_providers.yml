@@ -1,0 +1,158 @@
+---
+- set_fact: identity_providers_attribute_mappings_names="{{ (identity_providers_attribute_mappings | map(attribute='name') | join(',') )  }}"
+  when: identity_providers_attribute_mappings is defined
+
+- name: List configured attribute mappings (that can be used by IdPs)
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    mapping list -c ID --format value
+  run_once: True
+  become: true
+  register: configured_attribute_mappings_register
+  when: identity_providers_attribute_mappings is defined
+
+- set_fact: configured_attribute_mappings="{{ configured_attribute_mappings_register.stdout.split('\n') | map('trim') | list  | join(',') }}"
+  when: configured_attribute_mappings_register is defined and configured_attribute_mappings_register.stdout is defined
+
+- set_fact: identity_providers_attribute_mappings_names="{{ (identity_providers_attribute_mappings | map(attribute='name') | join(',') )  }}"
+  when: identity_providers_attribute_mappings is defined
+
+- name: Remove attribute mappings that are defined in OpenStack, but not in Kolla-Ansible configuration files
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    mapping delete {{item | trim }}
+  run_once: True
+  become: true
+  with_items: "{{configured_attribute_mappings.split(',')}}"
+  when: identity_providers_attribute_mappings is defined and should_remove_attribute_mappings and item not in identity_providers_attribute_mappings_names.split(',')
+
+- name: Register attribute mappings in OpenStack
+  shell: >
+    openstack --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    mapping create --rules "{{item.file}}" "{{item.name}}"
+  run_once: True
+  when: identity_providers_attribute_mappings is defined and (identity_providers_attribute_mappings is not none) and (identity_providers_attribute_mappings | length > 0) and item.name not in configured_attribute_mappings.split(',')
+  with_items: "{{identity_providers_attribute_mappings}}"
+  delegate_to: localhost
+
+- name: Update attribute mappings in OpenStack
+  shell: >
+    openstack --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    mapping set --rules "{{item.file}}" "{{item.name}}"
+  run_once: True
+  when: identity_providers_attribute_mappings is defined and identity_providers_attribute_mappings is not none and (identity_providers_attribute_mappings | length > 0) and item.name in configured_attribute_mappings.split(',')
+  with_items: "{{identity_providers_attribute_mappings}}"
+  delegate_to: localhost
+
+- name: List configured IdPs
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    identity provider list -c ID --format value
+  run_once: True
+  become: true
+  register: configured_identity_providers_register
+  when: identity_providers is defined
+
+- set_fact: configured_identity_providers="{{ configured_identity_providers_register.stdout.split('\n') | map('trim') | list  | join(',')}}"
+  when: configured_identity_providers_register is defined and configured_identity_providers_register.stdout is defined
+
+- set_fact: identity_providers_names="{{ (identity_providers | map(attribute='name') | join(',') )  }}"
+  when: identity_providers is defined
+
+- name: Remove identity providers that are defined in OpenStack, but not in Kolla-Ansible configuration files
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    identity provider delete {{item | trim }}
+  run_once: True
+  become: true
+  with_items: "{{configured_identity_providers.split(',')}}"
+  when: identity_providers is defined and should_remove_identity_providers and (item | trim) not in identity_providers_names.split(',')
+
+- name: Register Identity Providers in OpenStack
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    identity provider create --description "{{item.public_name}}" --remote-id "{{item.identifier}}" "{{item.name}}"
+  run_once: True
+  become: true
+  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.name not in configured_identity_providers.split(',')
+  with_items: "{{identity_providers}}"
+
+- name: Update Identity Providers in OpenStack according to Kolla-Ansible configuraitons
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    identity provider set --description "{{item.public_name}}" --remote-id "{{item.identifier}}" "{{item.name}}"
+  run_once: True
+  become: true
+  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.name in configured_identity_providers.split(',')
+  with_items: "{{identity_providers}}"
+
+- name: Configure attribute mappings for each Identity Provider. (We expect the mappings to be configured by the operator)
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    federation protocol create {{item.protocol}} --mapping {{item.attribute_mapping}} --identity-provider {{item.name}}
+  run_once: True
+  become: true
+  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.name not in configured_identity_providers.split(',')
+  with_items: "{{identity_providers}}"
+
+
+# NOTE(pem): We must allow this task to "fail" because the OpenStack CLI is
+# returning RC=1 for sucessful executions.
+
+- name: Update attribute mappings for each Identity Provider. (We expect the mappings to be configured by the operator).
+  shell: >
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
+    --os-password={{ openstack_auth.password }} \
+    --os-username={{ openstack_auth.username }} \
+    --os-project-name={{ openstack_auth.project_name }} \
+    --os-identity-api-version={{ identity_api_version }} \
+    federation protocol set --identity-provider {{item.name}} --mapping {{item.attribute_mapping}} {{item.protocol}}
+  run_once: True
+  ignore_errors: yes
+  become: true
+  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0)  and item.name in configured_identity_providers.split(',')
+  with_items: "{{identity_providers}}"

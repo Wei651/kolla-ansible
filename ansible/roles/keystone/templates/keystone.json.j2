@@ -39,7 +39,20 @@
             "dest": "/etc/{{ keystone_dir }}/wsgi-keystone.conf",
             "owner": "keystone",
             "perm": "0600"
+        }{% if should_use_oidc %},
+        {
+            "source": "{{ container_config_directory }}/metadata",
+            "dest": "{{ container_keystone_federation_oidc_metadata_folder }}",
+            "merge": true,
+            "preserve_properties": true
+        },
+        {
+            "source": "{{ container_config_directory }}/cert",
+            "dest": "{{ container_keystone_federation_oidc_idp_certificate_folder }}",
+            "merge": true,
+            "preserve_properties": true
         }
+        {% endif %}
     ],
     "permissions": [
         {
@@ -49,7 +62,19 @@
         {
             "path": "/var/log/kolla/keystone/keystone.log",
             "owner": "keystone:keystone"
+        },{% if should_use_oidc %}
+        {
+            "path": "/etc/apache2/metadata",
+            "owner": "www-data:www-data",
+            "perm": "0700",
+            "recurse": true
         },
+        {
+            "path": "/etc/apache2/cert",
+            "owner": "www-data:www-data",
+            "perm": "0700",
+            "recurse": true
+        },{% endif %}
         {
             "path": "/etc/keystone/fernet-keys",
             "owner": "keystone:keystone",
