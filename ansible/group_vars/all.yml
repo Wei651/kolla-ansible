@@ -718,6 +718,7 @@ nova_backend: "{{ 'rbd' if nova_backend_ceph | bool else 'default' }}"
 # Valid options are [ kvm, qemu, vmware, xenapi ]
 nova_compute_virt_type: "kvm"
 nova_instance_datadir_volume: "nova_compute"
+nova_custom_vendordata_driver_name: "CustomVendorData"
 
 #######################
 # Murano options

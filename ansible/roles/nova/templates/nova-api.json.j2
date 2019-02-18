@@ -1,3 +1,4 @@
+{% set python_path = '/usr/lib/python2.7/site-packages' if kolla_install_type == 'binary' else '/var/lib/kolla/venv/lib/python2.7/site-packages' %}
 {
     "command": "nova-api",
     "config_files": [
@@ -10,6 +11,12 @@
         {
             "source": "{{ container_config_directory }}/{{ nova_policy_file }}",
             "dest": "/etc/nova/{{ nova_policy_file }}",
+            "owner": "nova",
+            "perm": "0600"
+        }{% endif %}{% if nova_custom_vendordata_file is defined %},
+        {
+            "source": "{{ container_config_directory }}/{{ nova_custom_vendordata_file }}",
+            "dest": "{{ python_path }}/nova/api/metadata/{{ nova_custom_vendordata_file }}",
             "owner": "nova",
             "perm": "0600"
         }{% endif %}

@@ -55,6 +55,10 @@ compute_monitors=nova.compute.monitors.cpu.virt_driver
 
 transport_url = {{ rpc_transport_url }}
 
+{% if nova_custom_vendordata_file is defined %}
+vendordata_driver = nova.api.metadata.custom_vendordata.{{ nova_custom_vendordata_driver_name }}
+{% endif %}
+
 {% if enable_blazar | bool %}
 [filter_scheduler]
 available_filters = nova.scheduler.filters.all_filters

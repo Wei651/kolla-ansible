@@ -57,6 +57,32 @@
   when:
     - nova_policy.results
 
+- name: Check if custom vendordata file defined
+  local_action: stat path="{{ node_custom_config }}/nova/custom_vendordata.py"
+  run_once: True
+  register: nova_custom_vendordata
+
+- name: Copying over custom vendordata file
+  become: True
+  vars:
+    service: "{{ nova_services['nova-api'] }}"
+  template:
+    src: "{{ node_custom_config }}/nova/custom_vendordata.py"
+    dest: "{{ node_config_directory }}/nova-api/custom_vendordata.py"
+    mode: "0660"
+  when:
+    - inventory_hostname in groups['nova-api']
+    - service.enabled | bool
+    - nova_custom_vendordata.stat.exists
+  notify:
+    - Restart nova-api container
+
+- name: Set nova custom vendordata file
+  set_fact:
+    nova_custom_vendordata_file: "{{ nova_custom_vendordata.stat.path | basename }}"
+  when:
+    - nova_custom_vendordata.stat.exists
+
 - name: Copying over config.json files for services
   become: true
   template:
