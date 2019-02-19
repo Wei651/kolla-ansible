@@ -613,6 +613,8 @@ default_user_domain_id: "default"
 # Valid options are [ fernet ]
 keystone_token_provider: "fernet"
 fernet_token_expiry: 86400
+# Whether to use fernet tokens generated out-of-band on the host machine
+use_preconfigured_fernet: "no"
 
 keystone_default_user_role: "_member_"
 
