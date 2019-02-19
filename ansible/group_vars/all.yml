@@ -652,6 +652,8 @@ fernet_token_allow_expired_window: 172800
 # of keys are active. If this interval is lower than the sum of the token
 # expiry and allow expired window, multiple active keys will be necessary.
 fernet_key_rotation_interval: "{{ fernet_token_expiry + fernet_token_allow_expired_window }}"
+# Whether to use fernet tokens generated out-of-band on the host machine
+use_preconfigured_fernet: "no"
 
 keystone_default_user_role: "_member_"
 
