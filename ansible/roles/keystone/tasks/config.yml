@@ -193,7 +193,7 @@
 
 - name: Save the returned from cron jobs for building the crontab
   set_fact:
-    cron_jobs: "{{ (cron_jobs_json.stdout | from_json).cron_jobs }}"
+    cron_jobs: "{{ (cron_jobs_json.stdout | from_json).cron_jobs if not use_preconfigured_fernet else [] }}"
   ignore_errors: "{{ ansible_check_mode }}"
   when: keystone_token_provider == 'fernet'
 
