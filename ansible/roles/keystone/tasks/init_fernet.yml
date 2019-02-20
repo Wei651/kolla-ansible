@@ -31,7 +31,7 @@
   vars:
     keystone_fernet: "{{ keystone_services['keystone-fernet'] }}"
   docker_container:
-    auto_remove: True
+    cleanup: True
     detach: False
     image: "{{ keystone_fernet.image }}"
     name: "keystone_fernet_preconfigure"
