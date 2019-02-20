@@ -35,7 +35,9 @@
     detach: False
     image: "{{ keystone_fernet.image }}"
     name: "keystone_fernet_preconfigure"
-    command: "cp -r /etc/keystone/fernet-keys-preconfigured/* /etc/keystone/fernet-keys/"
+    command: >
+      sh -c "cp -r /etc/keystone/fernet-keys-preconfigured/. /etc/keystone/fernet-keys/ \
+        && chown -r keystone: /etc/keystone/fernet-keys/"
     volumes_from:
       - "{{ keystone_fernet.container_name }}"
     volumes:
