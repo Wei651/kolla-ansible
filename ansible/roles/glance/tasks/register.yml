@@ -9,7 +9,7 @@
       endpoint_region: "{{ openstack_region_name }}"
       url: "{{ item.url }}"
       interface: "{{ item.interface }}"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_glance_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
@@ -26,7 +26,7 @@
       user: "{{ glance_keystone_user }}"
       password: "{{ glance_keystone_password }}"
       role: "admin"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_glance_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
