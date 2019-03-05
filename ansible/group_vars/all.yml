@@ -657,6 +657,8 @@ use_preconfigured_fernet: "no"
 
 keystone_default_user_role: "_member_"
 
+keystone_primary_region_name: "{{ openstack_region_name }}"
+
 # OpenStack authentication string. You should only need to override these if you
 # are changing the admin tenant/project or user.
 openstack_auth:
