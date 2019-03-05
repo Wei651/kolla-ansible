@@ -9,7 +9,7 @@
       endpoint_region: "{{ openstack_region_name }}"
       url: "{{ item.url }}"
       interface: "{{ item.interface }}"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_ironic_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
@@ -27,7 +27,7 @@
       user: "{{ ironic_keystone_user }}"
       password: "{{ ironic_keystone_password }}"
       role: "admin"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_ironic_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
@@ -43,7 +43,7 @@
       endpoint_region: "{{ openstack_region_name }}"
       url: "{{ item.url }}"
       interface: "{{ item.interface }}"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_ironic_inspector_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
@@ -61,7 +61,7 @@
       user: "{{ ironic_inspector_keystone_user }}"
       password: "{{ ironic_inspector_keystone_password }}"
       role: "admin"
-      region_name: "{{ openstack_region_name }}"
+      region_name: "{{ keystone_primary_region_name }}"
       auth: "{{ openstack_ironic_inspector_auth }}"
       endpoint_type: "{{ openstack_interface }}"
   run_once: True
