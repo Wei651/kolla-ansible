@@ -82,6 +82,8 @@ heat_logging_debug: "{{ openstack_logging_debug }}"
 heat_keystone_user: "heat"
 heat_stack_user_role: "heat_stack_user"
 heat_stack_owner_role: "heat_stack_owner"
+heat_domain_admin_user: "heat_domain_admin"
+heat_domain_name: "heat_user_domain"
 
 openstack_heat_auth: "{{ openstack_auth }}"
 
