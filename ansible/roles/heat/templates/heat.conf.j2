@@ -8,9 +8,9 @@ heat_waitcondition_server_url = {{ heat_cfn_public_base_endpoint }}/v1/waitcondi
 
 heat_stack_user_role = {{ heat_stack_user_role }}
 
-stack_domain_admin = heat_domain_admin
+stack_domain_admin = {{ heat_domain_admin_user }}
 stack_domain_admin_password = {{ heat_domain_admin_password }}
-stack_user_domain_name = heat_user_domain
+stack_user_domain_name = {{ heat_domain_name }}
 
 {% if service_name == 'heat-engine' %}
 num_engine_workers = {{ openstack_service_workers }}
