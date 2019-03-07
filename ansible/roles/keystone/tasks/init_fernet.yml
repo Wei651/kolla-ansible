@@ -37,7 +37,7 @@
     name: "keystone_fernet_preconfigure"
     command: >
       sh -c "cp -r /etc/keystone/fernet-keys-preconfigured/. /etc/keystone/fernet-keys/ \
-        && chown -r keystone: /etc/keystone/fernet-keys/"
+        && chown -R keystone: /etc/keystone/fernet-keys/"
     volumes_from:
       - "{{ keystone_fernet.container_name }}"
     volumes:
