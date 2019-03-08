@@ -165,6 +165,9 @@ tunnel_interface: "{{ network_interface }}"
 bifrost_network_interface: "{{ network_interface }}"
 dns_interface: "{{ network_interface }}"
 tunnel_interface_address: "{{ hostvars[inventory_hostname]['ansible_' + tunnel_interface]['ipv4']['address'] }}"
+octavia_network_interface_address: "{{ hostvars[inventory_hostname]['ansible_' + octavia_network_interface]['ipv4']['address'] }}"
+api_interface_device: "{{ hostvars[inventory_hostname]['ansible_' + api_interface]['device'] }}"
+kolla_external_vip_interface_device: "{{ hostvars[inventory_hostname]['ansible_' + kolla_external_vip_interface]['device'] }}"
 
 # Valid options are [ openvswitch, linuxbridge, vmware_nsxv, vmware_nsxv3, vmware_dvs, opendaylight ]
 neutron_plugin_agent: "openvswitch"
