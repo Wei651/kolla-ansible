@@ -6,7 +6,7 @@
       service_name: "blazar"
       service_type: "reservation"
       description: "OpenStack Reservation Service"
-      endpoint_region: "{{ keystone_primary_region_name }}"
+      endpoint_region: "{{ openstack_region_name }}"
       url: "{{ item.url }}"
       interface: "{{ item.interface }}"
       region_name: "{{ keystone_primary_region_name }}"
