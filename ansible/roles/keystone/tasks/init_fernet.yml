@@ -39,7 +39,7 @@
   retries: 10
   delay: 5
   run_once: True
-  delegate_to: "{{ groups['keystone'][0] }}"
+  delegate_to: "{{ groups[keystone_services['keystone-fernet'].group][0] }}"
 
 - name: Run key distribution
   command: docker exec -t keystone_fernet /usr/bin/fernet-rotate.sh
