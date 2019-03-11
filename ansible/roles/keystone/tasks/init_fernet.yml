@@ -1,4 +1,26 @@
 ---
+
+- name: Get info on fernet keys volume
+  shell: docker volume inspect keystone_fernet_tokens
+  register: result
+
+- name: Get Keystone fernet volume data
+  set_fact:
+    dataresult: "{{ result.stdout | from_json }}"
+
+- name: Get Keystone fernet volume mount point
+  set_fact:
+    keystone_fernet_tokens_mountpoint: "{{ dataresult[0].Mountpoint }}"
+
+- name: Create fernet token file(s)
+  become: True
+  copy:
+    dest: "{{ keystone_fernet_tokens_mountpoint }}/{{index}}"
+    content: "{{item}}"
+  loop: "{{ keystone_fernet_token_list }}"
+  loop_control:
+    index_var: index
+
 - name: Waiting for Keystone SSH port to be UP
   wait_for:
     host: "{{ api_interface_address }}"
@@ -17,31 +39,10 @@
   retries: 10
   delay: 5
   run_once: True
-  delegate_to: "{{ groups[keystone_services['keystone-fernet'].group][0] }}"
-  when: not use_preconfigured_fernet | bool
+  delegate_to: "{{ groups['keystone'][0] }}"
 
 - name: Run key distribution
   command: docker exec -t keystone_fernet /usr/bin/fernet-rotate.sh
   run_once: True
-  delegate_to: "{{ groups[keystone_services['keystone-fernet'].group][0] }}"
-  when: not use_preconfigured_fernet | bool
-
-- name: Copy preconfigured keys
-  become: True
-  vars:
-    keystone_fernet: "{{ keystone_services['keystone-fernet'] }}"
-  docker_container:
-    cleanup: True
-    detach: False
-    image: "{{ keystone_fernet.image }}"
-    name: "keystone_fernet_preconfigure"
-    command: >
-      sh -c "cp -r /etc/keystone/fernet-keys-preconfigured/. /etc/keystone/fernet-keys/ \
-        && chown -R keystone: /etc/keystone/fernet-keys/"
-    volumes_from:
-      - "{{ keystone_fernet.container_name }}"
-    volumes:
-      - "/etc/keystone/fernet-keys:/etc/keystone/fernet-keys-preconfigured:ro"
-  run_once: True
-  delegate_to: "{{ groups[keystone_fernet.group][0] }}"
-  when: use_preconfigured_fernet | bool
+  delegate_to: "{{ groups['keystone'][0] }}"
+  when: keystone_fernet_token_list is undefined
