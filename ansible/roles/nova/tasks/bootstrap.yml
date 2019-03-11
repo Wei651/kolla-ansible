@@ -46,7 +46,6 @@
   run_once: True
   delegate_to: "{{ groups['nova-api'][0] }}"
   when:
-    - database.changed
     - not use_preconfigured_databases | bool
 
 - include_tasks: bootstrap_service.yml
