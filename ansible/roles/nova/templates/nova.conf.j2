@@ -163,9 +163,11 @@ max_pool_size = 50
 max_overflow = 1000
 max_retries = -1
 
+{% if service_name in ['nova-api', 'nova-scheduler'] %}
 [api_database]
 connection = mysql+pymysql://{{ nova_api_database_user }}:{{ nova_api_database_password }}@{{ nova_api_database_address }}/{{ nova_api_database_name }}
 max_retries = -1
+{% endif %}
 
 [cache]
 backend = oslo_cache.memcache_pool
