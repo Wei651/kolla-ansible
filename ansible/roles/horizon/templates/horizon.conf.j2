@@ -30,6 +30,11 @@ TraceEnable off
     WSGIPassAuthorization On
     WSGIApplicationGroup %{GLOBAL}
 
+{% if horizon_redirect_root is defined %}
+    RewriteEngine on
+    RewriteRule ^{{ horizon_redirect_root }}/?(.*)$ /$1 [R,L]
+{% endif %}
+
     <Location "/">
         Require all granted
     </Location>
