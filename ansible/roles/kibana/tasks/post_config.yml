@@ -68,4 +68,4 @@
   when:
     - kibana_default_index is defined
     - kibana_default_indexes is defined
-    - kibana_default_indexes['.kibana']['mappings']['config']['properties']['defaultIndex'] is not defined
+    - kibana_default_indexes['.kibana']['mappings']['config']['properties']['defaultIndex'] is defined
