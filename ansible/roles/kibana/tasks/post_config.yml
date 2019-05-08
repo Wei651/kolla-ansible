@@ -63,7 +63,7 @@
     method: PUT
     body: "{{ kibana_default_index | to_json }}"
     body_format: json
-    status_code: 201
+    status_code: 200, 201
   run_once: true
   when:
     - kibana_default_index is defined
