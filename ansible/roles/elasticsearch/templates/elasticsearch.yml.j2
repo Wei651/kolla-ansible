@@ -19,3 +19,6 @@ path.data: "/var/lib/elasticsearch/data"
 path.logs: "/var/log/kolla/elasticsearch"
 indices.fielddata.cache.size: 40%
 action.auto_create_index: "true"
+{% if es_enable_painless_regex | bool %}
+script.painless.regex.enabled: "true"
+{% endif %}
