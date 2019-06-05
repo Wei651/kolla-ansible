@@ -7,3 +7,6 @@
         src: "roles/common/templates/admin-openrc.sh.j2"
         dest: "{{ CONFIG_DIR | default('/etc/kolla') }}/admin-openrc.sh"
       run_once: True
+
+- import_playbook: "{{ post_deploy_extra_play }}"
+  when: post_deploy_extra_play is defined
