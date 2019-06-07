@@ -15,3 +15,16 @@
   with_together:
     - "{{ neutron_bridge_name.split(',') }}"
     - "{{ neutron_external_interface.split(',') }}"
+
+- name: Ensuring OVS patches are properly setup
+  command: docker exec openvswitch_db /usr/local/bin/kolla_ensure_openvswitch_patch_configured {{ item.split(':')[0] }} {{ item.split(':')[1] }}
+  register: status
+  changed_when: status.stdout.find('changed') != -1
+  when:
+    - inventory_hostname in groups["network"]
+      or (inventory_hostname in groups["compute"] and computes_need_external_bridge | bool )
+    - not enable_onos | bool
+    - neutron_bridge_patches is defined
+    - item is search(":")
+  with_together:
+    - "{{ neutron_bridge_patches.split(',') }}"
