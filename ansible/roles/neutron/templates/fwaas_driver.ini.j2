@@ -7,12 +7,15 @@ driver = vmware_nsxv_edge
 {% if neutron_fwaas_version == 'v1' %}
 agent_version = v1
 driver = iptables
+
+[service_providers]
+FIREWALL:Iptables:neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver:default
 {% elif neutron_fwaas_version == 'v2' %}
 agent_version = v2
 driver = iptables_v2
-{% endif %}
 
 [service_providers]
-service_provider = FIREWALL:Iptables:neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver:default
+service_provider = FIREWALL_V2:fwaas_db:neutron_fwaas.services.firewall.service_drivers.agents.agents.FirewallAgentDriver:default
+{% endif %}
 {% endif %}
 {% endif %}
