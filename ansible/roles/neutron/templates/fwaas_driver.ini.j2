@@ -12,11 +12,7 @@ driver = iptables
 FIREWALL:Iptables:neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver:default
 {% elif neutron_fwaas_version == 'v2' %}
 agent_version = v2
-{% if neutron_plugin_agent == "openvswitch" %}
-driver = ovs
-{% elif neutron_plugin_agent == "linuxbridge" %}
 driver = iptables_v2
-{% endif %}
 
 [service_providers]
 service_provider = FIREWALL_V2:fwaas_db:neutron_fwaas.services.firewall.service_drivers.agents.agents.FirewallAgentDriver:default
