@@ -42,27 +42,33 @@ flavor = keystone
 
 [glance_store]
 {% if glance_backend_vmware | bool %}
-default_store = vsphere
+default_backend = vsphere
 {% elif glance_backend_ceph | bool %}
-default_store = rbd
+default_backend = rbd
 {% elif glance_backend_swift | bool %}
-default_store = swift+http
+default_backend = swift
 {% else %}
-default_store = file
-filesystem_store_datadir = /var/lib/glance/images/
+default_backend = file
 {% endif %}
 
 {% if glance_store_backends %}
-stores = {{ glance_store_backends|map(attribute='name')|join(',') }}
+enabled_backends = {% for backend in glance_store_backends %}{{ backend.name }}:{{ backend.type }}{% if not loop.last %},{% endif %}{% endfor %}
 {% endif %}
 
+[file]
+filesystem_store_datadir = /var/lib/glance/images/
+
+[http]
+
 {% if enable_ceph | bool and glance_backend_ceph | bool %}
+[rbd]
 rbd_store_user = glance
 rbd_store_pool = {{ ceph_glance_pool_name }}
 rbd_store_chunk_size = 8
 {% endif %}
 
 {% if glance_backend_swift | bool %}
+[swift0]
 swift_store_container = glance
 swift_store_multiple_containers_seed = 0
 swift_store_multi_tenant = False
@@ -74,6 +80,7 @@ swift_store_auth_insecure = True
 {% endif %}
 
 {% if glance_backend_vmware | bool %}
+[vmware]
 vmware_server_host = {{ vmware_vcenter_host_ip }}
 vmware_server_username = {{ vmware_vcenter_host_username }}
 vmware_server_password = {{ vmware_vcenter_host_password }}
