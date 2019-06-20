@@ -85,7 +85,6 @@ container_proxy:
 # to the api_interface.  Allow the bind address to be an override.
 api_interface_address: "{{ 'api' | kolla_address }}"
 
-
 ####################
 # Database options
 ####################
@@ -94,7 +93,6 @@ database_user: "root"
 database_port: "3306"
 database_connection_recycle_time: 10
 database_max_pool_size: 1
-
 
 ####################
 # Docker options
@@ -182,7 +180,6 @@ default_extra_volumes: []
 ####################
 # Arbitrary unique number from 0..255
 keepalived_virtual_router_id: "51"
-
 
 #######################
 # Elasticsearch Options
@@ -1018,7 +1015,6 @@ nova_console: "novnc"
 murano_agent_rabbitmq_vhost: "muranoagent"
 murano_agent_rabbitmq_user: "muranoagent"
 
-
 #######################
 # Horizon options
 #######################
@@ -1118,7 +1114,6 @@ prometheus_openstack_exporter_endpoint_type: "internal"
 ############
 enable_vitrage_prometheus_datasource: "{{ enable_prometheus | bool }}"
 
-
 ####################
 # InfluxDB options
 ####################
@@ -1140,12 +1135,8 @@ kafka_broker_count: "{{ groups['kafka'] | length }}"
 #########################
 # Internal Image options
 #########################
-distro_python_version_map: {
-  "centos": "3.6",
-  "debian": "3.9",
-  "rhel": "3.6",
-  "ubuntu": "3.8"
-}
+distro_python_version_map:
+  { "centos": "3.6", "debian": "3.9", "rhel": "3.6", "ubuntu": "3.8" }
 
 distro_python_version: "{{ distro_python_version_map[kolla_base_distro] }}"
 
