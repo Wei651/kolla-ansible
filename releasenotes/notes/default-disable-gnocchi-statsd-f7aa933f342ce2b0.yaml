@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    The [gnocchi-statsd](https://gnocchi.xyz/statsd.html) daemon is
+    no longer enabled by default. If you are using the daemon, you
+    will need to set `enable_gnocchi_statsd: yes` to continue using
+    it in your deployment.
