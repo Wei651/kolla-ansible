@@ -8,5 +8,19 @@
         dest: "{{ CONFIG_DIR | default('/etc/kolla') }}/admin-openrc.sh"
       run_once: True
 
+- name: Install OpenStack clients on the deploy node
+  hosts: localhost
+  become: true
+  tasks:
+    - template:
+        src: "roles/common/templates/requirements.txt.j2"
+        dest: "{{ CONFIG_DIR | default('/etc/kolla') }}/requirements.txt"
+      run_once: True
+    - pip:
+        requirements: "{{ CONFIG_DIR | default('/etc/kolla') }}/requirements.txt"
+        virtualenv: "{{ virtualenv is none | ternary(omit, virtualenv) }}"
+        extra_args: "-c https://git.openstack.org/cgit/openstack/requirements/plain/upper-constraints.txt?h=stable/{{ openstack_release }}"
+      run_once: True
+
 - import_playbook: "{{ post_deploy_extra_play }}"
   when: post_deploy_extra_play is defined
