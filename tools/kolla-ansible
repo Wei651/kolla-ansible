@@ -135,6 +135,7 @@ Can be specified multiple times to pass multiple inventories.
     --skip-tags <tags>                 Only run plays and tasks whose tags do not match these values
     --extra, -e <ansible variables>    Set additional variables as key=value or YAML/JSON passed to ansible-playbook
     --passwords <passwords_path>       Specify path to the passwords file
+    --globals <globals_path>           Specify path to the globals file
     --limit <host>                     Specify host to run plays
     --forks <forks>                    Number of forks to run Ansible with
     --vault-id <@prompt or path>       Specify @prompt or password file (Ansible >=  2.4)
@@ -189,6 +190,7 @@ cat <<EOF
 --tags -t
 --extra -e
 --passwords
+--globals
 --limit
 --forks
 --vault-id
@@ -225,7 +227,7 @@ EOF
 check_environment_coherence
 
 SHORT_OPTS="hi:p:t:k:e:CD:v"
-LONG_OPTS="help,inventory:,playbook:,skip-tags:,tags:,key:,extra:,check,diff,verbose,configdir:,passwords:,limit:,forks:,vault-id:,ask-vault-pass,vault-password-file:,yes-i-really-really-mean-it,include-images,include-dev:,full,incremental"
+LONG_OPTS="help,inventory:,playbook:,skip-tags:,tags:,key:,extra:,check,diff,verbose,configdir:,passwords:,globals:,limit:,forks:,vault-id:,ask-vault-pass,vault-password-file:,yes-i-really-really-mean-it,include-images,include-dev:,full,incremental"
 
 RAW_ARGS="$*"
 ARGS=$(getopt -o "${SHORT_OPTS}" -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
@@ -322,6 +324,11 @@ while [ "$#" -gt 0 ]; do
 
     (--passwords)
             PASSWORDS_FILE="$2"
+            shift 2
+            ;;
+
+    (--globals)
+            GLOBALS_FILE="$2"
             shift 2
             ;;
 
@@ -522,8 +529,9 @@ esac
 
 GLOBALS_DIR="${CONFIG_DIR}/globals.d"
 EXTRA_GLOBALS=$(find ${GLOBALS_DIR} -maxdepth 1 -type f -name '*.yml' -printf ' -e @%p' 2>/dev/null)
+GLOBALS_FILE="${GLOBALS_FILE:-${CONFIG_DIR}/globals.yml}"
 PASSWORDS_FILE="${PASSWORDS_FILE:-${CONFIG_DIR}/passwords.yml}"
-CONFIG_OPTS="-e @${CONFIG_DIR}/globals.yml ${EXTRA_GLOBALS} -e @${PASSWORDS_FILE} -e CONFIG_DIR=${CONFIG_DIR}"
+CONFIG_OPTS="-e @${GLOBALS_FILE} ${EXTRA_GLOBALS} -e @${PASSWORDS_FILE} -e CONFIG_DIR=${CONFIG_DIR}"
 CMD="ansible-playbook $CONFIG_OPTS $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
 for INVENTORY in ${INVENTORIES[@]}; do
     CMD="${CMD} --inventory $INVENTORY"
