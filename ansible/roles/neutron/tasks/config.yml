@@ -84,6 +84,13 @@
   notify:
     - "Restart {{ item.key }} container"
 
+- name: Compute facts for bridge and external interface names
+  set_fact:
+    neutron_bridge_name: "{{ neutron_networks | selectattr('external_interface', 'defined') | map(attribute='bridge_name') | join(',') }}"
+    neutron_external_interface: "{{ neutron_networks | selectattr('external_interface', 'defined') | map(attribute='external_interface') | join(',') }}"
+    neutron_bridge_patches: "{% for n in (neutron_networks | selectattr('patch_interface', 'defined')) %}{{ n.bridge_name }}:{{ n.patch_interface }}{% if not loop.last %},{% endif %}{% endfor %}"
+  when: neutron_networks is defined
+
 - name: Copying over neutron.conf
   become: true
   vars:
