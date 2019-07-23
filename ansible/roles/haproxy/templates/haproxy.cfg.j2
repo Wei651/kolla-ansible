@@ -364,6 +364,9 @@ listen nova_serialconsole_proxy_external
 listen neutron_server
   option http-tunnel
   bind {{ kolla_internal_vip_address }}:{{ neutron_server_port }}
+{% for extra_option in haproxy_listen_neutron_server_extra %}
+  {{ extra_option }}
+{% endfor %}
 {% for http_option in haproxy_listen_http_extra %}
   {{ http_option }}
 {% endfor %}

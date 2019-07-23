@@ -66,3 +66,6 @@ haproxy_process_cpu_map: "no"
 
 haproxy_dimensions: "{{ default_container_dimensions }}"
 keepalived_dimensions: "{{ default_container_dimensions }}"
+
+# extra options
+haproxy_listen_neutron_server_extra: []
