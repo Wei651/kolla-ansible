@@ -20,7 +20,6 @@ loadbalancer_services:
     volumes: "{{ keepalived_default_volumes + keepalived_extra_volumes }}"
     dimensions: "{{ keepalived_dimensions }}"
 
-
 ####################
 # Docker
 ####################
@@ -54,7 +53,11 @@ haproxy_enable_healthchecks: "{{ enable_container_healthchecks }}"
 haproxy_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 haproxy_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 haproxy_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-haproxy_healthcheck_test: ["CMD-SHELL", "healthcheck_curl http://{{ api_interface_address |  put_address_in_context('url') }}:{{ haproxy_monitor_port }}"]
+haproxy_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl http://{{ api_interface_address |  put_address_in_context('url') }}:{{ haproxy_monitor_port }}",
+  ]
 haproxy_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 haproxy_healthcheck:
   interval: "{{ haproxy_healthcheck_interval }}"
@@ -93,5 +96,8 @@ haproxy_defaults_balance: "roundrobin"
 # Avoid TCP connections refusing to die after VIP switch
 # https://bugs.launchpad.net/kolla-ansible/+bug/1917068
 haproxy_host_ipv4_tcp_retries2: "KOLLA_UNSET"
+
+# extra options
+haproxy_listen_neutron_server_extra: []
 
 kolla_externally_managed_cert: False
