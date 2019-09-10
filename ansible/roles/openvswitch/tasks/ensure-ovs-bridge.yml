@@ -27,5 +27,5 @@
       or (inventory_hostname in groups["compute"] and computes_need_external_bridge | bool )
     - not enable_onos | bool
     - neutron_bridge_patches is defined
-  with_together:
+  with_items:
     - "{{ neutron_bridge_patches.split(',') }}"
