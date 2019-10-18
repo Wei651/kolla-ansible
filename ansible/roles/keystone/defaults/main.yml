@@ -75,6 +75,7 @@ keystone_dimensions: "{{ default_container_dimensions }}"
 keystone_fernet_dimensions: "{{ default_container_dimensions }}"
 keystone_ssh_dimensions: "{{ default_container_dimensions }}"
 
+
 ####################
 # OpenStack
 ####################
@@ -90,3 +91,13 @@ keystone_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
 keystone_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
 keystone_dev_mode: "{{ kolla_dev_mode }}"
 keystone_source_version: "{{ kolla_source_version }}"
+
+####################
+# WSGI 
+####################
+keystone_public_vhost_config: |
+  {{'#'}} Custom vhost configuration can be added here via
+  {{'#'}} the `keystone_public_vhost_config` variable.
+keystone_admin_vhost_config: |
+  {{'#'}} Custom vhost configuration can be added here via
+  {{'#'}} the `keystone_admin_vhost_config` variable.
