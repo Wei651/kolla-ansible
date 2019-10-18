@@ -68,13 +68,11 @@ keystone_database_name: "keystone"
 keystone_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}keystone{% endif %}"
 keystone_database_address: "{{ database_address | put_address_in_context('url') }}:{{ database_port }}"
 
-
 ####################
 # Fernet
 ####################
 keystone_username: "keystone"
 keystone_groupname: "keystone"
-
 
 ####################
 # Docker
@@ -102,7 +100,11 @@ keystone_enable_healthchecks: "{{ enable_container_healthchecks }}"
 keystone_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 keystone_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 keystone_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-keystone_healthcheck_test: ["CMD-SHELL", "healthcheck_curl {{ 'https' if keystone_enable_tls_backend | bool else 'http' }}://{{ api_interface_address |  put_address_in_context('url') }}:{{ keystone_public_listen_port }}"]
+keystone_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl {{ 'https' if keystone_enable_tls_backend | bool else 'http' }}://{{ api_interface_address |  put_address_in_context('url') }}:{{ keystone_public_listen_port }}",
+  ]
 keystone_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 keystone_healthcheck:
   interval: "{{ keystone_healthcheck_interval }}"
@@ -115,7 +117,8 @@ keystone_ssh_enable_healthchecks: "{{ enable_container_healthchecks }}"
 keystone_ssh_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 keystone_ssh_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 keystone_ssh_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-keystone_ssh_healthcheck_test: ["CMD-SHELL", "healthcheck_listen sshd {{ keystone_ssh_port }}"]
+keystone_ssh_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_listen sshd {{ keystone_ssh_port }}"]
 keystone_ssh_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 keystone_ssh_healthcheck:
   interval: "{{ keystone_ssh_healthcheck_interval }}"
@@ -128,7 +131,8 @@ keystone_fernet_enable_healthchecks: "{{ enable_container_healthchecks }}"
 keystone_fernet_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 keystone_fernet_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 keystone_fernet_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-keystone_fernet_healthcheck_test: ["CMD-SHELL", "/usr/bin/fernet-healthcheck.sh"]
+keystone_fernet_healthcheck_test:
+  ["CMD-SHELL", "/usr/bin/fernet-healthcheck.sh"]
 keystone_fernet_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 keystone_fernet_healthcheck:
   interval: "{{ keystone_fernet_healthcheck_interval }}"
@@ -154,7 +158,6 @@ keystone_logging_debug: "{{ openstack_logging_debug }}"
 
 openstack_keystone_auth: "{{ openstack_auth }}"
 
-
 ####################
 # Kolla
 ####################
@@ -162,7 +165,6 @@ keystone_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
 keystone_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
 keystone_dev_mode: "{{ kolla_dev_mode }}"
 keystone_source_version: "{{ kolla_source_version }}"
-
 
 ####################
 # Notifications
@@ -178,7 +180,6 @@ keystone_notification_topics:
 
 keystone_enabled_notification_topics: "{{ keystone_notification_topics | selectattr('enabled', 'equalto', true) | list }}"
 
-
 ####################
 # Keystone
 ####################
@@ -187,9 +188,9 @@ keystone_ks_services:
     type: "identity"
     description: "Openstack Identity Service"
     endpoints:
-      - {'interface': 'admin', 'url': '{{ keystone_admin_url }}'}
-      - {'interface': 'internal', 'url': '{{ keystone_internal_url }}'}
-      - {'interface': 'public', 'url': '{{ keystone_public_url }}'}
+      - { "interface": "admin", "url": "{{ keystone_admin_url }}" }
+      - { "interface": "internal", "url": "{{ keystone_internal_url }}" }
+      - { "interface": "public", "url": "{{ keystone_public_url }}" }
 
 ####################
 # TLS
@@ -215,3 +216,13 @@ keystone_enable_federation_openid: "{{ enable_keystone_federation | bool and key
 keystone_should_remove_attribute_mappings: False
 keystone_should_remove_identity_providers: False
 keystone_federation_oidc_scopes: "openid email profile"
+
+####################
+# WSGI
+####################
+keystone_wsgi_public_vhost_config: |
+  {{'#'}} Custom vhost configuration can be added here via
+  {{'#'}} the `keystone_wsgi_public_vhost_config` variable.
+keystone_wsgi_admin_vhost_config: |
+  {{'#'}} Custom vhost configuration can be added here via
+  {{'#'}} the `keystone_wsgi_admin_vhost_config` variable.
