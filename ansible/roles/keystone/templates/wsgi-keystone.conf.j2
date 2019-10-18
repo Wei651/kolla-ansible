@@ -37,6 +37,7 @@ LogLevel info
     ErrorLog "{{ keystone_log_dir }}/keystone-apache-public-error.log"
     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
     CustomLog "{{ keystone_log_dir }}/keystone-apache-public-access.log" logformat
+    {{ keystone_public_vhost_config | indent(4) }}
 </VirtualHost>
 
 <VirtualHost *:{{ keystone_admin_listen_port }}>
@@ -51,4 +52,5 @@ LogLevel info
     ErrorLog "{{ keystone_log_dir }}/keystone-apache-admin-error.log"
     LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
     CustomLog "{{ keystone_log_dir }}/keystone-apache-admin-access.log" logformat
+    {{ keystone_admin_vhost_config | indent(4) }}
 </VirtualHost>
