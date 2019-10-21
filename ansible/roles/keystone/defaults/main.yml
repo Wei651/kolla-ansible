@@ -95,9 +95,9 @@ keystone_source_version: "{{ kolla_source_version }}"
 ####################
 # WSGI 
 ####################
-keystone_public_vhost_config: |
+keystone_wsgi_public_vhost_config: |
   {{'#'}} Custom vhost configuration can be added here via
-  {{'#'}} the `keystone_public_vhost_config` variable.
-keystone_admin_vhost_config: |
+  {{'#'}} the `keystone_wsgi_public_vhost_config` variable.
+keystone_wsgi_admin_vhost_config: |
   {{'#'}} Custom vhost configuration can be added here via
-  {{'#'}} the `keystone_admin_vhost_config` variable.
+  {{'#'}} the `keystone_wsgi_admin_vhost_config` variable.
