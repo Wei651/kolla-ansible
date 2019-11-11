@@ -40,8 +40,8 @@
     --os-auth-url {{ keystone_admin_url }}
     --os-identity-api-version 3
     --os-project-domain-name default
-    --os-tenant-name admin
-    --os-username admin
+    --os-project-name {{ keystone_admin_project_name }}
+    --os-username {{ keystone_admin_username }}
     --os-password {{ keystone_admin_password }}
     --os-user-domain-name default
     --os-region-name {{ openstack_region_name }}
