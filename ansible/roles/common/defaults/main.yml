@@ -173,3 +173,6 @@ fluentd_input_openstack_services:
     enabled: "{{ enable_watcher | bool }}"
 
 fluentd_enabled_input_openstack_services: "{{ fluentd_input_openstack_services | selectattr('enabled', 'equalto', true) | map(attribute='name') | list }}"
+
+cron_logrotate_rotation_interval: "weekly"
+cron_logrotate_rotation_count: 6
