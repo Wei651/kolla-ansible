@@ -68,3 +68,6 @@ fluentd_image_full: "{{ fluentd_image }}:{{ fluentd_tag }}"
 
 syslog_swift_facility: "local0"
 syslog_haproxy_facility: "local1"
+
+cron_logrotate_rotation_interval: "weekly"
+cron_logrotate_rotation_count: 6
