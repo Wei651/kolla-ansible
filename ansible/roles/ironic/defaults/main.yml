@@ -198,7 +198,7 @@ openstack_ironic_inspector_auth: "{{ openstack_auth }}"
 #########
 # Ironic
 #########
-ironic_dnsmasq_interface: "{{ api_interface }}"
+ironic_dnsmasq_interface: "{{ api_interface_device }}"
 ironic_dnsmasq_dhcp_range:
 ironic_dnsmasq_default_gateway:
 ironic_dnsmasq_boot_file: "{% if enable_ironic_ipxe | bool %}undionly.kpxe{% else %}pxelinux.0{% endif %}"
