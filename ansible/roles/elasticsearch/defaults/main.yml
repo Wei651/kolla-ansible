@@ -1,6 +1,8 @@
 ---
 project_name: "elasticsearch"
 
+elasticsearch_backend_http_extra: []
+
 elasticsearch_services:
   elasticsearch:
     container_name: elasticsearch
@@ -19,6 +21,12 @@ elasticsearch_services:
         port: "{{ elasticsearch_port }}"
         frontend_http_extra:
           - "option dontlog-normal"
+      elasticsearch_external:
+        enabled: "{{ enable_elasticsearch_external }}"
+        mode: "http"
+        external: true
+        port: "{{ elasticsearch_port }}"
+        backend_http_extra: "{{ elasticsearch_backend_http_extra }}"
   elasticsearch-curator:
     container_name: elasticsearch_curator
     group: elasticsearch-curator
