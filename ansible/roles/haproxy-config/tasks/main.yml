@@ -18,6 +18,8 @@
     - service.enabled | bool
     - service.haproxy is defined
     - enable_haproxy | bool
-  with_dict: "{{ project_services }}"
+  loop: "{{ project_services|dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   notify:
     - Restart haproxy container
