@@ -98,7 +98,11 @@ horizon_enable_healthchecks: "{{ enable_container_healthchecks }}"
 horizon_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 horizon_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 horizon_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-horizon_healthcheck_test: ["CMD-SHELL", "healthcheck_curl {{ 'https' if horizon_enable_tls_backend | bool else 'http' }}://{{ api_interface_address |  put_address_in_context('url') }}:{{ horizon_listen_port }}"]
+horizon_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl {{ 'https' if horizon_enable_tls_backend | bool else 'http' }}://{{ api_interface_address |  put_address_in_context('url') }}:{{ horizon_listen_port }}",
+  ]
 horizon_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 horizon_healthcheck:
   interval: "{{ horizon_healthcheck_interval }}"
@@ -125,13 +129,17 @@ horizon_extra_volumes: "{{ default_extra_volumes }}"
 horizon_logging_debug: "{{ openstack_logging_debug }}"
 horizon_keystone_url: "{{ keystone_public_url if horizon_use_keystone_public_url | bool else keystone_internal_url }}/v3"
 
-
 ####################
 # Apache
 ####################
 horizon_wsgi_processes: "{{ openstack_service_workers }}"
 horizon_wsgi_threads: 1
 
+####################
+# HAProxy
+####################
+horizon_frontend_http_extra: []
+horizon_external_frontend_http_extra: []
 
 ####################
 # Kolla
