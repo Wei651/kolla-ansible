@@ -103,6 +103,8 @@ backend {{ service_name }}_back
         {# Use the parent host group but allow it to be overridden #}
         {% set host_group = haproxy_service.host_group|default(service.group) %}
         {# Additional options can be defined in config, and are additive to the global extras #}
+        {% set frontend_enabled = haproxy_service.frontend_enabled|default(true) %}
+        {% set backend_enabled = haproxy_service.backend_enabled|default(true) %}
         {% set frontend_tcp_extra = haproxy_service.frontend_tcp_extra|default([]) + haproxy_frontend_tcp_extra %}
         {% set backend_tcp_extra = haproxy_service.backend_tcp_extra|default([]) %}
         {% set frontend_http_extra = haproxy_service.frontend_http_extra|default([]) + haproxy_frontend_http_extra %}
@@ -113,13 +115,17 @@ backend {{ service_name }}_back
         {% if auth_user and auth_pass %}
 {{ userlist_macro(haproxy_name, auth_user, auth_pass) }}
         {% endif %}
+        {% if frontend_enabled|bool %}
 {{ frontend_macro(haproxy_name, haproxy_service.port, mode, external,
                   frontend_http_extra, frontend_tcp_extra) }}
-        {# Redirect (to https) is a special case, as it does not include a backend #}
-        {% if mode != 'redirect' %}
+        {% endif %}
+        {% if backend_enabled|bool %}
+            {# Redirect (to https) is a special case, as it does not include a backend #}
+            {% if mode != 'redirect' %}
 {{ backend_macro(haproxy_name, listen_port, mode, host_group,
                  custom_member_list, backend_http_extra, backend_tcp_extra,
                  auth_user, auth_pass) }}
+            {% endif %}
         {% endif %}
     {% endif %}
 {%- endfor -%}
