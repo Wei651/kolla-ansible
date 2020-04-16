@@ -26,6 +26,20 @@
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
 
+- name: Ensuring certs config subdir exists
+  vars:
+    service: "{{ haproxy_services['haproxy'] }}"
+  file:
+    path: "{{ node_config_directory }}/haproxy/certs.d"
+    state: "directory"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0770"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+
 - name: Copying over config.json files for services
   template:
     src: "{{ item.key }}.json.j2"
@@ -96,15 +110,13 @@
     service: "{{ haproxy_services['haproxy'] }}"
   copy:
     src: "{{ kolla_external_fqdn_cert }}"
-    dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/certs.d/haproxy.pem"
     mode: "0660"
   become: true
   when:
     - kolla_enable_tls_external | bool
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
-  with_items:
-    - "haproxy.pem"
   notify:
     - Restart haproxy container
 
@@ -113,15 +125,29 @@
     service: "{{ haproxy_services['haproxy'] }}"
   copy:
     src: "{{ kolla_internal_fqdn_cert }}"
-    dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/haproxy-internal.pem"
     mode: "0660"
   become: true
   when:
     - kolla_enable_tls_internal | bool
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
-  with_items:
-    - "haproxy-internal.pem"
+  notify:
+    - Restart haproxy container
+
+- name: Copying over custom haproxy certs
+  vars:
+    service: "{{ haproxy_services['haproxy'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/certs.d/"
+    mode: "0660"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  with_fileglob:
+    - "{{ node_custom_config }}/haproxy/certs.d/*.pem"
   notify:
     - Restart haproxy container
 

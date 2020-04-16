@@ -1,0 +1,55 @@
+---
+project_name: "letsencrypt"
+
+letsencrypt_services:
+  letsencrypt-acme:
+    container_name: letsencrypt_acme
+    group: letsencrypt
+    enabled: true
+    image: "{{ letsencrypt_acme_image_full }}"
+    volumes: "{{ letsencrypt_acme_default_volumes + letsencrypt_acme_extra_volumes }}"
+    dimensions: "{{ letsencrypt_acme_dimensions }}"
+    haproxy:
+      letsencrypt_acme_server:
+        enabled: "{{ enable_letsencrypt }}"
+        mode: "http"
+        external: false
+        port: "{{ letsencrypt_acme_port }}"
+  letsencrypt-certbot:
+    container_name: letsencrypt_certbot
+    group: letsencrypt
+    enabled: true
+    image: "{{ letsencrypt_certbot_image_full }}"
+    volumes: "{{ letsencrypt_certbot_default_volumes + letsencrypt_certbot_extra_volumes }}"
+    dimensions: "{{ letsencrypt_certbot_dimensions }}"
+
+##############
+# LetsEncrypt
+##############
+letsencrypt_install_type: "{{ kolla_install_type }}"
+
+letsencrypt_acme_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ letsencrypt_install_type }}-letsencrypt-acme"
+letsencrypt_acme_tag: "{{ openstack_tag }}"
+letsencrypt_acme_image_full: "{{ letsencrypt_acme_image }}:{{ letsencrypt_acme_tag }}"
+
+letsencrypt_certbot_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ letsencrypt_install_type }}-letsencrypt-certbot"
+letsencrypt_certbot_tag: "{{ openstack_tag }}"
+letsencrypt_certbot_image_full: "{{ letsencrypt_certbot_image }}:{{ letsencrypt_certbot_tag }}"
+
+letsencrypt_acme_dimensions: "{{ default_container_dimensions }}"
+letsencrypt_certbot_dimensions: "{{ default_container_dimensions }}"
+
+letsencrypt_acme_default_volumes:
+  - "{{ node_config_directory }}/letsencrypt-acme/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "letsencrypt_acme_webroot:/www/data"
+  - "kolla_logs:/var/log/kolla/"
+letsencrypt_acme_extra_volumes: "{{ default_extra_volumes }}"
+
+letsencrypt_certbot_default_volumes:
+  - "{{ node_config_directory }}/letsencrypt-certbot/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "letsencrypt_certs:/etc/letsencrypt"
+  - "letsencrypt_acme_webroot:/www/data"
+  - "kolla_logs:/var/log/kolla/"
+letsencrypt_certbot_extra_volumes: "{{ default_extra_volumes }}"
