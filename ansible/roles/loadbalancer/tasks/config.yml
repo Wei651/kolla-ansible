@@ -26,6 +26,20 @@
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
 
+- name: Ensuring certs config subdir exists
+  vars:
+    service: "{{ haproxy_services['haproxy'] }}"
+  file:
+    path: "{{ node_config_directory }}/haproxy/certs.d"
+    state: "directory"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0770"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+
 - name: Copying over config.json files for services
   template:
     src: "{{ item.key }}/{{ item.key }}.json.j2"
@@ -96,16 +110,17 @@
     service: "{{ loadbalancer_services['haproxy'] }}"
   copy:
     src: "{{ kolla_external_fqdn_cert }}"
-    dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+    dest: "{{ item }}"
     mode: "0660"
   become: true
+  with_items:
+    - "{{ node_config_directory }}/haproxy/certs.d/haproxy.pem"
+    - "{{ node_config_directory }}/haproxy/haproxy.pem"
   when:
     - kolla_enable_tls_external | bool
     - not kolla_externally_managed_cert | bool
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
-  with_items:
-    - "haproxy.pem"
   notify:
     - Restart haproxy container
 
@@ -114,7 +129,7 @@
     service: "{{ loadbalancer_services['haproxy'] }}"
   copy:
     src: "{{ kolla_internal_fqdn_cert }}"
-    dest: "{{ node_config_directory }}/haproxy/{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/haproxy-internal.pem"
     mode: "0660"
   become: true
   when:
@@ -122,8 +137,22 @@
     - not kolla_externally_managed_cert | bool
     - inventory_hostname in groups[service.group]
     - service.enabled | bool
-  with_items:
-    - "haproxy-internal.pem"
+  notify:
+    - Restart haproxy container
+
+- name: Copying over custom haproxy certs
+  vars:
+    service: "{{ haproxy_services['haproxy'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/haproxy/certs.d/"
+    mode: "0660"
+  become: true
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  with_fileglob:
+    - "{{ node_custom_config }}/haproxy/certs.d/*.pem"
   notify:
     - Restart haproxy container
 

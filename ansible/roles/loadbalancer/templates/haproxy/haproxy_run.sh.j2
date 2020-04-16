@@ -1,5 +1,17 @@
 #!/bin/bash -x
 
+{% if enable_letsencrypt | bool %}
+# Copy LetsEncrypt-managed certificates to HAProxy cert folder
+le_base=/etc/letsencrypt/live
+if [[ -d "$le_base" ]]; then
+    domains=$(find $le_base -mindepth 1 -type d -exec basename {} \;)
+    for domain in $domains; do
+        cat "$le_base/$domain/fullchain.pem" "$le_base/$domain/privkey.pem" \
+            >"/etc/haproxy/certs.d/$domain.pem"
+    done
+fi
+{% endif %}
+
 # We need to run haproxy with one `-f` for each service, because including an
 # entire config directory was not a feature until version 1.7 of HAProxy.
 # So, append "-f $cfg" to the haproxy command for each service file.

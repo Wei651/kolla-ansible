@@ -1,0 +1,18 @@
+daemon off;
+
+user letsencrypt letsencrypt;
+error_log /var/log/kolla/{{ project_name }}/acme-server-error.log;
+
+events {}
+
+http {
+  access_log /var/log/kolla/{{ project_name }}/acme-server-access.log;
+
+{% for domain in letsencrypt_domains %}
+  server {
+    listen {{ api_interface_address }}:{{ letsencrypt_acme_port }};
+    server_name {{ domain }};
+    root /www/data/{{ domain }};
+  }
+{% endfor %}
+}

@@ -1,5 +1,5 @@
 #jinja2: lstrip_blocks: True
-{%- set external_tls_bind_info = 'ssl crt /etc/haproxy/haproxy.pem' if kolla_enable_tls_external|bool else '' %}
+{%- set external_tls_bind_info = 'ssl crt /etc/haproxy/certs.d/' if kolla_enable_tls_external|bool else '' %}
 {%- set internal_tls_bind_info = 'ssl crt /etc/haproxy/haproxy-internal.pem' if kolla_enable_tls_internal|bool else '' %}
 
 {%- macro userlist_macro(service_name, auth_user, auth_pass) %}
@@ -9,11 +9,16 @@ userlist {{ service_name }}-user
 
 {%- macro frontend_macro(service_name, service_port, service_mode, external,
                          frontend_http_extra, frontend_tcp_extra) %}
+    {%- set letsencrypt_service = external|bool and enable_letsencrypt|bool and service_port|string == '80' %}
 frontend {{ service_name }}_front
     {% if service_mode == 'redirect' %}
     mode http
     {% else %}
     mode {{ service_mode }}
+    {% endif %}
+    {% if letsencrypt_service %}
+    acl letsencrypt_acl path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt_acme_server_back if letsencrypt_acl
     {% endif %}
     {% if service_mode == 'http' %}
     {# Delete any pre-populated XFP header #}
@@ -45,7 +50,7 @@ frontend {{ service_name }}_front
     {{ "bind %s:%s %s"|e|format(vip_address, service_port, tls_option)|trim() }}
     {# Redirect mode sets a redirect scheme instead of a backend #}
     {% if service_mode == 'redirect' %}
-    redirect scheme https code 301 if !{ ssl_fc }
+    redirect scheme https code 301 unless { ssl_fc } {% if letsencrypt_service %}or letsencrypt_acl{% endif %}
     {% else %}
     default_backend {{ service_name }}_back
     {% endif %}

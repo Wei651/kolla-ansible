@@ -738,3 +738,12 @@ ovn-database
 
 [ovn-sb-db:children]
 ovn-database
+
+[letsencrypt:children]
+haproxy
+
+[letsencrypt-acme:children]
+letsencrypt
+
+[letsencrypt-certbot:children]
+letsencrypt

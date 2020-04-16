@@ -44,6 +44,7 @@
         - enable_keystone_{{ enable_keystone | bool }}
         - enable_kibana_{{ enable_kibana | bool }}
         - enable_kuryr_{{ enable_kuryr | bool }}
+        - enable_letsencrypt_{{ enable_letsencrypt | bool }}
         - enable_loadbalancer_{{ enable_loadbalancer | bool }}
         - enable_magnum_{{ enable_magnum | bool }}
         - enable_manila_{{ enable_manila | bool }}
@@ -105,15 +106,14 @@
   gather_facts: false
   hosts:
     - loadbalancer
-    - '&enable_loadbalancer_True'
+    - "&enable_loadbalancer_True"
   serial: '{{ kolla_serial|default("0") }}'
   tags:
     - haproxy
     - keepalived
     - loadbalancer
   roles:
-    - { role: loadbalancer,
-        when: enable_loadbalancer | bool }
+    - { role: loadbalancer, when: enable_loadbalancer | bool }
   tasks:
     - block:
         - include_role:
@@ -211,6 +211,11 @@
             tasks_from: loadbalancer
           tags: kibana
           when: enable_kibana | bool
+        - include_role:
+            name: letsencrypt
+            tasks_from: loadbalancer
+          tags: letsencrypt
+          when: enable_letsencrypt | bool
         - include_role:
             name: magnum
             tasks_from: loadbalancer
@@ -350,77 +355,67 @@
   gather_facts: false
   hosts:
     - collectd
-    - '&enable_collectd_True'
+    - "&enable_collectd_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: collectd,
-        tags: collectd,
-        when: enable_collectd | bool }
+    - { role: collectd, tags: collectd, when: enable_collectd | bool }
 
 - name: Apply role zookeeper
   gather_facts: false
   hosts:
     - zookeeper
-    - '&enable_zookeeper_True'
+    - "&enable_zookeeper_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: zookeeper,
-        tags: zookeeper,
-        when: enable_zookeeper | bool }
+    - { role: zookeeper, tags: zookeeper, when: enable_zookeeper | bool }
 
 - name: Apply role influxdb
   gather_facts: false
   hosts:
     - influxdb
-    - '&enable_influxdb_True'
+    - "&enable_influxdb_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: influxdb,
-        tags: influxdb,
-        when: enable_influxdb | bool }
+    - { role: influxdb, tags: influxdb, when: enable_influxdb | bool }
 
 - name: Apply role telegraf
   gather_facts: false
   hosts:
     - telegraf
-    - '&enable_telegraf_True'
+    - "&enable_telegraf_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: telegraf,
-        tags: telegraf,
-        when: enable_telegraf | bool }
+    - { role: telegraf, tags: telegraf, when: enable_telegraf | bool }
 
 - name: Apply role redis
   gather_facts: false
   hosts:
     - redis
-    - '&enable_redis_True'
+    - "&enable_redis_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: redis,
-        tags: redis,
-        when: enable_redis | bool }
+    - { role: redis, tags: redis, when: enable_redis | bool }
 
 - name: Apply role mariadb
   gather_facts: false
   hosts:
     - mariadb
-    - '&enable_mariadb_True'
+    - "&enable_mariadb_True"
   roles:
-    - { role: mariadb,
-        tags: mariadb,
-        when: enable_mariadb | bool }
+    - { role: mariadb, tags: mariadb, when: enable_mariadb | bool }
 
 - name: Apply role memcached
   gather_facts: false
   hosts:
     - memcached
-    - '&enable_memcached_True'
+    - "&enable_memcached_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: memcached,
+    - {
+        role: memcached,
         tags: [memcache, memcached],
-        when: enable_memcached | bool }
+        when: enable_memcached | bool,
+      }
 
 - name: Apply role prometheus
   gather_facts: false
@@ -435,152 +430,140 @@
     - prometheus-openstack-exporter
     - prometheus-elasticsearch-exporter
     - prometheus-blackbox-exporter
-    - '&enable_prometheus_True'
+    - "&enable_prometheus_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: prometheus,
-        tags: prometheus,
-        when: enable_prometheus | bool }
+    - { role: prometheus, tags: prometheus, when: enable_prometheus | bool }
 
 - name: Apply role iscsi
   gather_facts: false
   hosts:
     - iscsid
     - tgtd
-    - '&enable_iscsid_True'
+    - "&enable_iscsid_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: iscsi,
-        tags: iscsi,
-        when: enable_iscsid | bool }
+    - { role: iscsi, tags: iscsi, when: enable_iscsid | bool }
 
 - name: Apply role multipathd
   gather_facts: false
   hosts:
     - multipathd
-    - '&enable_multipathd_True'
+    - "&enable_multipathd_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: multipathd,
-        tags: multipathd,
-        when: enable_multipathd | bool }
+    - { role: multipathd, tags: multipathd, when: enable_multipathd | bool }
 
 - name: Apply role rabbitmq
   gather_facts: false
   hosts:
     - rabbitmq
-    - '&enable_rabbitmq_True'
+    - "&enable_rabbitmq_True"
   roles:
-    - { role: rabbitmq,
+    - {
+        role: rabbitmq,
         tags: rabbitmq,
-        role_rabbitmq_cluster_cookie: '{{ rabbitmq_cluster_cookie }}',
-        role_rabbitmq_cluster_port: '{{ rabbitmq_cluster_port }}',
-        role_rabbitmq_epmd_port: '{{ rabbitmq_epmd_port }}',
+        role_rabbitmq_cluster_cookie: "{{ rabbitmq_cluster_cookie }}",
+        role_rabbitmq_cluster_port: "{{ rabbitmq_cluster_port }}",
+        role_rabbitmq_epmd_port: "{{ rabbitmq_epmd_port }}",
         role_rabbitmq_groups: rabbitmq,
-        role_rabbitmq_management_port: '{{ rabbitmq_management_port }}',
-        role_rabbitmq_monitoring_password: '{{ rabbitmq_monitoring_password }}',
-        role_rabbitmq_monitoring_user: '{{ rabbitmq_monitoring_user }}',
-        role_rabbitmq_password: '{{ rabbitmq_password }}',
-        role_rabbitmq_port: '{{ rabbitmq_port }}',
-        role_rabbitmq_user: '{{ rabbitmq_user }}',
-        when: enable_rabbitmq | bool }
+        role_rabbitmq_management_port: "{{ rabbitmq_management_port }}",
+        role_rabbitmq_monitoring_password: "{{ rabbitmq_monitoring_password }}",
+        role_rabbitmq_monitoring_user: "{{ rabbitmq_monitoring_user }}",
+        role_rabbitmq_password: "{{ rabbitmq_password }}",
+        role_rabbitmq_port: "{{ rabbitmq_port }}",
+        role_rabbitmq_user: "{{ rabbitmq_user }}",
+        when: enable_rabbitmq | bool,
+      }
 
 - name: Apply role rabbitmq (outward)
   gather_facts: false
   hosts:
     - outward-rabbitmq
-    - '&enable_outward_rabbitmq_True'
+    - "&enable_outward_rabbitmq_True"
   roles:
-    - { role: rabbitmq,
+    - {
+        role: rabbitmq,
         tags: rabbitmq,
         project_name: outward_rabbitmq,
-        role_rabbitmq_cluster_cookie: '{{ outward_rabbitmq_cluster_cookie }}',
-        role_rabbitmq_cluster_port: '{{ outward_rabbitmq_cluster_port }}',
-        role_rabbitmq_epmd_port: '{{ outward_rabbitmq_epmd_port }}',
+        role_rabbitmq_cluster_cookie: "{{ outward_rabbitmq_cluster_cookie }}",
+        role_rabbitmq_cluster_port: "{{ outward_rabbitmq_cluster_port }}",
+        role_rabbitmq_epmd_port: "{{ outward_rabbitmq_epmd_port }}",
         role_rabbitmq_groups: outward-rabbitmq,
-        role_rabbitmq_management_port: '{{ outward_rabbitmq_management_port }}',
-        role_rabbitmq_password: '{{ outward_rabbitmq_password }}',
-        role_rabbitmq_port: '{{ outward_rabbitmq_port }}',
-        role_rabbitmq_user: '{{ outward_rabbitmq_user }}',
-        when: enable_outward_rabbitmq | bool }
+        role_rabbitmq_management_port: "{{ outward_rabbitmq_management_port }}",
+        role_rabbitmq_password: "{{ outward_rabbitmq_password }}",
+        role_rabbitmq_port: "{{ outward_rabbitmq_port }}",
+        role_rabbitmq_user: "{{ outward_rabbitmq_user }}",
+        when: enable_outward_rabbitmq | bool,
+      }
 
 - name: Apply role qdrouterd
   gather_facts: false
   hosts:
     - qdrouterd
-    - '&enable_qdrouterd_True'
+    - "&enable_qdrouterd_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: qdrouterd,
-        tags: qdrouterd,
-        when: enable_qdrouterd | bool }
+    - { role: qdrouterd, tags: qdrouterd, when: enable_qdrouterd | bool }
 
 - name: Apply role etcd
   gather_facts: false
   hosts:
     - etcd
-    - '&enable_etcd_True'
+    - "&enable_etcd_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: etcd,
-        tags: etcd,
-        when: enable_etcd | bool }
+    - { role: etcd, tags: etcd, when: enable_etcd | bool }
 
 - name: Apply role keystone
   gather_facts: false
   hosts:
     - keystone
-    - '&enable_keystone_True'
+    - "&enable_keystone_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: keystone,
-        tags: keystone,
-        when: enable_keystone | bool }
+    - { role: keystone, tags: keystone, when: enable_keystone | bool }
 
 - name: Apply role elasticsearch
   gather_facts: false
   hosts:
     - elasticsearch
-    - '&enable_elasticsearch_True'
+    - "&enable_elasticsearch_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: elasticsearch,
+    - {
+        role: elasticsearch,
         tags: elasticsearch,
-        when: enable_elasticsearch | bool }
+        when: enable_elasticsearch | bool,
+      }
 
 - name: Apply role kibana
   gather_facts: false
   hosts:
     - kibana
-    - '&enable_kibana_True'
+    - "&enable_kibana_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: kibana,
-        tags: kibana,
-        when: enable_kibana | bool }
+    - { role: kibana, tags: kibana, when: enable_kibana | bool }
 
 - name: Apply role kafka
   gather_facts: false
   hosts:
     - kafka
-    - '&enable_kafka_True'
+    - "&enable_kafka_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: kafka,
-        tags: kafka,
-        when: enable_kafka | bool }
+    - { role: kafka, tags: kafka, when: enable_kafka | bool }
 
 - name: Apply role storm
   gather_facts: false
   hosts:
     - storm-worker
     - storm-nimbus
-    - '&enable_storm_True'
+    - "&enable_storm_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: storm,
-        tags: storm,
-        when: enable_storm | bool }
+    - { role: storm, tags: storm, when: enable_storm | bool }
 
 - name: Apply role swift
   gather_facts: false
@@ -589,12 +572,10 @@
     - swift-container-server
     - swift-object-server
     - swift-proxy-server
-    - '&enable_swift_True'
+    - "&enable_swift_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: swift,
-        tags: swift,
-        when: enable_swift | bool }
+    - { role: swift, tags: swift, when: enable_swift | bool }
 
 - name: Apply role ceph-rgw
   gather_facts: false
@@ -602,23 +583,19 @@
     # NOTE(mgoddard): This is only used to register Keystone services, and
     # can run on any host running kolla-toolbox.
     - kolla-toolbox
-    - '&enable_ceph_rgw_True'
+    - "&enable_ceph_rgw_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: ceph-rgw,
-        tags: ceph-rgw,
-        when: enable_ceph_rgw | bool }
+    - { role: ceph-rgw, tags: ceph-rgw, when: enable_ceph_rgw | bool }
 
 - name: Apply role glance
   gather_facts: false
   hosts:
     - glance-api
-    - '&enable_glance_True'
+    - "&enable_glance_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: glance,
-        tags: glance,
-        when: enable_glance | bool }
+    - { role: glance, tags: glance, when: enable_glance | bool }
 
 - name: Apply role ironic
   gather_facts: false
@@ -628,12 +605,10 @@
     - ironic-inspector
     - ironic-pxe
     - ironic-ipxe
-    - '&enable_ironic_True'
+    - "&enable_ironic_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: ironic,
-        tags: ironic,
-        when: enable_ironic | bool }
+    - { role: ironic, tags: ironic, when: enable_ironic | bool }
 
 - name: Apply role cinder
   gather_facts: false
@@ -642,23 +617,19 @@
     - cinder-backup
     - cinder-scheduler
     - cinder-volume
-    - '&enable_cinder_True'
+    - "&enable_cinder_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: cinder,
-        tags: cinder,
-        when: enable_cinder | bool }
+    - { role: cinder, tags: cinder, when: enable_cinder | bool }
 
 - name: Apply role placement
   gather_facts: false
   hosts:
     - placement-api
-    - '&enable_placement_True'
+    - "&enable_placement_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: placement,
-        tags: placement,
-        when: enable_placement | bool }
+    - { role: placement, tags: placement, when: enable_placement | bool }
 
 # Nova deployment is more complicated than other services, so is covered in its
 # own playbook.
@@ -668,23 +639,27 @@
   gather_facts: false
   hosts:
     - openvswitch
-    - '&enable_openvswitch_True_enable_ovs_dpdk_False'
+    - "&enable_openvswitch_True_enable_ovs_dpdk_False"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: openvswitch,
+    - {
+        role: openvswitch,
         tags: openvswitch,
-        when: "(enable_openvswitch | bool) and not (enable_ovs_dpdk | bool)"}
+        when: "(enable_openvswitch | bool) and not (enable_ovs_dpdk | bool)",
+      }
 
 - name: Apply role ovs-dpdk
   gather_facts: false
   hosts:
     - openvswitch
-    - '&enable_openvswitch_True_enable_ovs_dpdk_True'
+    - "&enable_openvswitch_True_enable_ovs_dpdk_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: ovs-dpdk,
+    - {
+        role: ovs-dpdk,
         tags: ovs-dpdk,
-        when: "(enable_openvswitch | bool) and (enable_ovs_dpdk | bool)"}
+        when: "(enable_openvswitch | bool) and (enable_ovs_dpdk | bool)",
+      }
 
 - name: Apply role ovn
   gather_facts: false
@@ -693,12 +668,10 @@
     - ovn-nb-db
     - ovn-northd
     - ovn-sb-db
-    - '&enable_ovn_True'
+    - "&enable_ovn_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: ovn,
-        tags: ovn,
-        when: enable_ovn | bool }
+    - { role: ovn, tags: ovn, when: enable_ovn | bool }
 
 - name: Apply role neutron
   gather_facts: false
@@ -714,35 +687,29 @@
     - neutron-infoblox-ipam-agent
     - compute
     - manila-share
-    - '&enable_neutron_True'
+    - "&enable_neutron_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: neutron,
-        tags: neutron,
-        when: enable_neutron | bool }
+    - { role: neutron, tags: neutron, when: enable_neutron | bool }
 
 - name: Apply role kuryr
   gather_facts: false
   hosts:
     - compute
-    - '&enable_kuryr_True'
+    - "&enable_kuryr_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: kuryr,
-        tags: kuryr,
-        when: enable_kuryr | bool }
+    - { role: kuryr, tags: kuryr, when: enable_kuryr | bool }
 
 - name: Apply role hacluster
   gather_facts: false
   hosts:
     - hacluster
     - hacluster-remote
-    - '&enable_hacluster_True'
+    - "&enable_hacluster_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: hacluster,
-        tags: hacluster,
-        when: enable_hacluster | bool }
+    - { role: hacluster, tags: hacluster, when: enable_hacluster | bool }
 
 - name: Apply role heat
   gather_facts: false
@@ -750,35 +717,29 @@
     - heat-api
     - heat-api-cfn
     - heat-engine
-    - '&enable_heat_True'
+    - "&enable_heat_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: heat,
-        tags: heat,
-        when: enable_heat | bool }
+    - { role: heat, tags: heat, when: enable_heat | bool }
 
 - name: Apply role horizon
   gather_facts: false
   hosts:
     - horizon
-    - '&enable_horizon_True'
+    - "&enable_horizon_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: horizon,
-        tags: horizon,
-        when: enable_horizon | bool }
+    - { role: horizon, tags: horizon, when: enable_horizon | bool }
 
 - name: Apply role murano
   gather_facts: false
   hosts:
     - murano-api
     - murano-engine
-    - '&enable_murano_True'
+    - "&enable_murano_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: murano,
-        tags: murano,
-        when: enable_murano | bool }
+    - { role: murano, tags: murano, when: enable_murano | bool }
 
 - name: Apply role solum
   gather_facts: false
@@ -789,24 +750,20 @@
     - solum-conductor
     - solum-application-deployment
     - solum-image-builder
-    - '&enable_solum_True'
+    - "&enable_solum_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: solum,
-        tags: solum,
-        when: enable_solum | bool }
+    - { role: solum, tags: solum, when: enable_solum | bool }
 
 - name: Apply role magnum
   gather_facts: false
   hosts:
     - magnum-api
     - magnum-conductor
-    - '&enable_magnum_True'
+    - "&enable_magnum_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: magnum,
-        tags: magnum,
-        when: enable_magnum | bool }
+    - { role: magnum, tags: magnum, when: enable_magnum | bool }
 
 - name: Apply role mistral
   gather_facts: false
@@ -815,24 +772,20 @@
     - mistral-engine
     - mistral-executor
     - mistral-event-engine
-    - '&enable_mistral_True'
+    - "&enable_mistral_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: mistral,
-        tags: mistral,
-        when: enable_mistral | bool }
+    - { role: mistral, tags: mistral, when: enable_mistral | bool }
 
 - name: Apply role sahara
   gather_facts: false
   hosts:
     - sahara-api
     - sahara-engine
-    - '&enable_sahara_True'
+    - "&enable_sahara_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: sahara,
-        tags: sahara,
-        when: enable_sahara | bool }
+    - { role: sahara, tags: sahara, when: enable_sahara | bool }
 
 - name: Apply role manila
   gather_facts: false
@@ -841,12 +794,10 @@
     - manila-data
     - manila-share
     - manila-scheduler
-    - '&enable_manila_True'
+    - "&enable_manila_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: manila,
-        tags: manila,
-        when: enable_manila | bool }
+    - { role: manila, tags: manila, when: enable_manila | bool }
 
 - name: Apply role gnocchi
   gather_facts: false
@@ -854,12 +805,10 @@
     - gnocchi-api
     - gnocchi-metricd
     - gnocchi-statsd
-    - '&enable_gnocchi_True'
+    - "&enable_gnocchi_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: gnocchi,
-        tags: gnocchi,
-        when: enable_gnocchi | bool }
+    - { role: gnocchi, tags: gnocchi, when: enable_gnocchi | bool }
 
 - name: Apply role ceilometer
   gather_facts: false
@@ -868,12 +817,10 @@
     - ceilometer-notification
     - ceilometer-compute
     - ceilometer-ipmi
-    - '&enable_ceilometer_True'
+    - "&enable_ceilometer_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: ceilometer,
-        tags: ceilometer,
-        when: enable_ceilometer | bool }
+    - { role: ceilometer, tags: ceilometer, when: enable_ceilometer | bool }
 
 - name: Apply role monasca
   gather_facts: false
@@ -889,12 +836,10 @@
     - monasca-thresh
     - monasca-notification
     - monasca-persister
-    - '&enable_monasca_True'
+    - "&enable_monasca_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: monasca,
-        tags: monasca,
-        when: enable_monasca | bool }
+    - { role: monasca, tags: monasca, when: enable_monasca | bool }
 
 - name: Apply role aodh
   gather_facts: false
@@ -903,12 +848,10 @@
     - aodh-evaluator
     - aodh-listener
     - aodh-notifier
-    - '&enable_aodh_True'
+    - "&enable_aodh_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: aodh,
-        tags: aodh,
-        when: enable_aodh | bool }
+    - { role: aodh, tags: aodh, when: enable_aodh | bool }
 
 - name: Apply role barbican
   gather_facts: false
@@ -916,12 +859,10 @@
     - barbican-api
     - barbican-keystone-listener
     - barbican-worker
-    - '&enable_barbican_True'
+    - "&enable_barbican_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: barbican,
-        tags: barbican,
-        when: enable_barbican | bool }
+    - { role: barbican, tags: barbican, when: enable_barbican | bool }
 
 - name: Apply role cyborg
   gather_facts: false
@@ -929,12 +870,10 @@
     - cyborg-api
     - cyborg-agent
     - cyborg-conductor
-    - '&enable_cyborg_True'
+    - "&enable_cyborg_True"
   serial: '{{ serial|default("0") }}'
   roles:
-    - { role: cyborg,
-        tags: cyborg,
-        when: enable_cyborg | bool }
+    - { role: cyborg, tags: cyborg, when: enable_cyborg | bool }
 
 - name: Apply role designate
   gather_facts: false
@@ -946,23 +885,19 @@
     - designate-worker
     - designate-sink
     - designate-backend-bind9
-    - '&enable_designate_True'
+    - "&enable_designate_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: designate,
-        tags: designate,
-        when: enable_designate | bool }
+    - { role: designate, tags: designate, when: enable_designate | bool }
 
 - name: Apply role vmtp
   gather_facts: false
   hosts:
     - vmtp
-    - '&enable_vmtp_True'
+    - "&enable_vmtp_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: vmtp,
-        tags: vmtp,
-        when: enable_vmtp | bool }
+    - { role: vmtp, tags: vmtp, when: enable_vmtp | bool }
 
 - name: Apply role trove
   gather_facts: false
@@ -970,12 +905,10 @@
     - trove-api
     - trove-conductor
     - trove-taskmanager
-    - '&enable_trove_True'
+    - "&enable_trove_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: trove,
-        tags: trove,
-        when: enable_trove | bool }
+    - { role: trove, tags: trove, when: enable_trove | bool }
 
 - name: Apply role watcher
   gather_facts: false
@@ -983,47 +916,39 @@
     - watcher-api
     - watcher-engine
     - watcher-applier
-    - '&enable_watcher_True'
+    - "&enable_watcher_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: watcher,
-        tags: watcher,
-        when: enable_watcher | bool }
+    - { role: watcher, tags: watcher, when: enable_watcher | bool }
 
 - name: Apply role grafana
   gather_facts: false
   hosts:
     - grafana
-    - '&enable_grafana_True'
+    - "&enable_grafana_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: grafana,
-        tags: grafana,
-        when: enable_grafana | bool }
+    - { role: grafana, tags: grafana, when: enable_grafana | bool }
 
 - name: Apply role cloudkitty
   gather_facts: false
   hosts:
     - cloudkitty-api
     - cloudkitty-processor
-    - '&enable_cloudkitty_True'
+    - "&enable_cloudkitty_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: cloudkitty,
-        tags: cloudkitty,
-        when: enable_cloudkitty | bool }
+    - { role: cloudkitty, tags: cloudkitty, when: enable_cloudkitty | bool }
 
 - name: Apply role freezer
   gather_facts: false
   hosts:
     - freezer-api
     - freezer-scheduler
-    - '&enable_freezer_True'
+    - "&enable_freezer_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: freezer,
-        tags: freezer,
-        when: enable_freezer | bool }
+    - { role: freezer, tags: freezer, when: enable_freezer | bool }
 
 - name: Apply role senlin
   gather_facts: false
@@ -1032,24 +957,20 @@
     - senlin-conductor
     - senlin-engine
     - senlin-health-manager
-    - '&enable_senlin_True'
+    - "&enable_senlin_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: senlin,
-        tags: senlin,
-        when: enable_senlin | bool }
+    - { role: senlin, tags: senlin, when: enable_senlin | bool }
 
 - name: Apply role tacker
   gather_facts: false
   hosts:
     - tacker-server
     - tacker-conductor
-    - '&enable_tacker_True'
+    - "&enable_tacker_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: tacker,
-        tags: tacker,
-        when: enable_tacker | bool }
+    - { role: tacker, tags: tacker, when: enable_tacker | bool }
 
 - name: Apply role octavia
   gather_facts: false
@@ -1058,12 +979,10 @@
     - octavia-health-manager
     - octavia-housekeeping
     - octavia-worker
-    - '&enable_octavia_True'
+    - "&enable_octavia_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: octavia,
-        tags: octavia,
-        when: enable_octavia | bool }
+    - { role: octavia, tags: octavia, when: enable_octavia | bool }
 
 - name: Apply role zun
   gather_facts: false
@@ -1072,24 +991,20 @@
     - zun-wsproxy
     - zun-compute
     - zun-cni-daemon
-    - '&enable_zun_True'
+    - "&enable_zun_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: zun,
-        tags: zun,
-        when: enable_zun | bool }
+    - { role: zun, tags: zun, when: enable_zun | bool }
 
 - name: Apply role skydive
   gather_facts: false
   hosts:
     - skydive-agent
     - skydive-analyzer
-    - '&enable_skydive_True'
+    - "&enable_skydive_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: skydive,
-        tags: skydive,
-        when: enable_skydive | bool }
+    - { role: skydive, tags: skydive, when: enable_skydive | bool }
 
 - name: Apply role vitrage
   gather_facts: false
@@ -1099,24 +1014,20 @@
     - vitrage-notifier
     - vitrage-ml
     - vitrage-persistor
-    - '&enable_vitrage_True'
+    - "&enable_vitrage_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: vitrage,
-        tags: vitrage,
-        when: enable_vitrage | bool }
+    - { role: vitrage, tags: vitrage, when: enable_vitrage | bool }
 
 - name: Apply role blazar
   gather_facts: false
   hosts:
     - blazar-api
     - blazar-manager
-    - '&enable_blazar_True'
+    - "&enable_blazar_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: blazar,
-        tags: blazar,
-        when: enable_blazar | bool }
+    - { role: blazar, tags: blazar, when: enable_blazar | bool }
 
 - name: Apply role masakari
   gather_facts: false
@@ -1125,9 +1036,16 @@
     - masakari-engine
     - masakari-hostmonitor
     - masakari-instancemonitor
-    - '&enable_masakari_True'
+    - "&enable_masakari_True"
   serial: '{{ kolla_serial|default("0") }}'
   roles:
-    - { role: masakari,
-        tags: masakari,
-        when: enable_masakari | bool }
+    - { role: masakari, tags: masakari, when: enable_masakari | bool }
+
+- name: Apply role letsencrypt
+  gather_facts: false
+  hosts:
+    - letsencrypt-acme
+    - "&enable_letsencrypt_True"
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - { role: letsencrypt, tags: letsencrypt, when: enable_letsencrypt | bool }

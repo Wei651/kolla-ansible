@@ -1,0 +1,7 @@
+logs-dir = /var/log/kolla/letsencrypt
+rsa-key-size = 4096
+
+email = {{ letsencrypt_email }}
+
+authenticator = webroot
+webroot-map = {{ letsencrypt_webroot_map | to_json }}
