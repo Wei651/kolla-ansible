@@ -1,0 +1,12 @@
+{
+    "command": "nginx",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/nginx.conf",
+            "dest": "/etc/nginx/nginx.conf",
+            "owner": "root",
+            "perm": "0644"
+        }
+    ],
+    "permissions": []
+}

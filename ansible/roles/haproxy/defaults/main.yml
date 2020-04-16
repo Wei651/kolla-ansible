@@ -53,6 +53,7 @@ haproxy_default_volumes:
   - "{{ node_config_directory }}/haproxy/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "letsencrypt_certs:/etc/letsencrypt:ro"
   - "haproxy_socket:/var/lib/kolla/haproxy/"
 keepalived_default_volumes:
   - "{{ node_config_directory }}/keepalived/:{{ container_config_directory }}/:ro"
