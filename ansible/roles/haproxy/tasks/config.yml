@@ -110,9 +110,12 @@
     service: "{{ haproxy_services['haproxy'] }}"
   copy:
     src: "{{ kolla_external_fqdn_cert }}"
-    dest: "{{ node_config_directory }}/haproxy/certs.d/haproxy.pem"
+    dest: "{{ item }}"
     mode: "0660"
   become: true
+  with_items:
+    - "{{ node_config_directory }}/haproxy/certs.d/haproxy.pem"
+    - "{{ node_config_directory }}/haproxy/haproxy.pem"
   when:
     - kolla_enable_tls_external | bool
     - inventory_hostname in groups[service.group]
