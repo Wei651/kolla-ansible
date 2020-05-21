@@ -223,12 +223,13 @@ OPENSTACK_KEYSTONE_DEFAULT_ROLE = "{{ keystone_default_user_role }}"
 # Do not remove the mandatory credentials mechanism.
 # Note: The last two tuples are sample mapping keys to a identity provider
 # and federation protocol combination (WEBSSO_IDP_MAPPING).
-{% if identity_providers is defined and identity_providers | length > 0 %}
+{% if enable_keystone_federation | bool %}
 WEBSSO_ENABLED = True
+WEBSSO_KEYSTONE_URL = "{{ keystone_public_url }}/v3"
 WEBSSO_CHOICES = (
     ("credentials", _("Keystone Credentials")),
-    {% for idp in identity_providers %}
-    ("{{idp.name}}", "{{idp.public_name}}"),
+    {% for idp in keystone_identity_providers %}
+    ("{{ idp.name }}", "{{ idp.public_name }}"),
     {% endfor %}
 )
 
@@ -240,8 +241,8 @@ WEBSSO_CHOICES = (
 # as the protocol_id when redirecting to the WebSSO by protocol endpoint.
 # NOTE: The value is expected to be a tuple formatted as: (<idp_id>, <protocol_id>).
 WEBSSO_IDP_MAPPING = {
-{% for idp in identity_providers %}
-    "{{idp.name}}": ("{{idp.name}}", "{{idp.protocol}}"),
+{% for idp in keystone_identity_providers %}
+    "{{ idp.name }}": ("{{ idp.name }}", "{{ idp.protocol }}"),
 {% endfor %}
 }
 {% endif %}

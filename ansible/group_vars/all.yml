@@ -555,6 +555,7 @@ enable_glance: "{{ enable_openstack_core | bool }}"
 enable_haproxy: "yes"
 enable_keepalived: "{{ enable_haproxy | bool }}"
 enable_keystone: "{{ enable_openstack_core | bool }}"
+enable_keystone_federation: "{{ (keystone_identity_providers | length > 0) and (keystone_identity_mappings | length > 0) }}"
 enable_mariadb: "yes"
 enable_memcached: "yes"
 enable_neutron: "{{ enable_openstack_core | bool }}"
@@ -1180,6 +1181,7 @@ telegraf_enable_docker_input: "no"
 # * client_id (client id used by the OpenId Connect Protocol);
 # * client_secret (client secret used by the OpenId Connect protocol);
 # * attribute_mapping (the attribute mapping to be used for this IdP. This mapping is expected to already exist in OpenStack.);
+# * metadata_url
 # * certificate_url (a URL file://, http:// or https:// to the certificate pem of the IdP);
 # * key_id (the id of the issuer's public key, you can also retrieve it from the /certs IdP url, this value also accept a url);
 # * certificate_transformer (In some cases, if the "certificate_url" does not return a certificate, but an XML or another format
@@ -1188,14 +1190,16 @@ telegraf_enable_docker_input: "no"
 # * key_transformer (same as the certificate_transformer, but receives a 'key_id' variable)
 #
 # The IdPs meta information are to be presented to Kolla-ansible as the following example:
-# identity_providers:
+# keystone_identity_providers:
 #   - {name: "myidp1", protocol: "openid", identifier: "https://accounts.google.com", public_name: "Authenticate via myidp1", client_id: "myidp1.client.id", client_secret: "myidp1-secret", attribute_mapping: "mappingId1", organization_domain_name: "xyz.com", certificate_url: "url/to/the/idp/certificate", key_id: "the-idp-public-key-id-or-a-url-to-load-the-key-id", certificate_transformer: "python-command-to-do-some-transformation-in-the-certificate", key_transformer: "python-command-to-do-some-transformation-in-the-key-id"}
 #
 # We also need to configure the attribute mapping that is used by IdPs. The configuration of attribute mappings is a list of objects, where each object must have a 'name' (that mapps to the 'attribute_mapping' to the IdP object in the IdPs set), and the 'file' with a full qualified path to a mapping file.
-# identity_providers_attribute_mappings:
+# keystone_identity_mappings:
 #   - {name: "mappingId1", file: "/full/qualified/path/to/mapping/json/file/to/mappingId1"}
 #   - {name: "mappingId2", file: "/full/qualified/path/to/mapping/json/file/to/mappingId2"}
 #   - {name: "mappingId3", file: "/full/qualified/path/to/mapping/json/file/to/mappingId3"}
+keystone_identity_providers: []
+keystone_identity_mappings: []
 
 # The identity API version to be used to register IdPs in OpenStack
 identity_api_version: 3

@@ -164,12 +164,13 @@ keystone_wsgi_admin_vhost_config: |
 remote_id_attribute_saml: "Shib-Identity-Provider"
 # Default OpenID Connect remote attribute key
 remote_id_attribute_oidc: "HTTP_OIDC_ISS"
-oidc_crypto_passphrase: "OIDC_cryptographic_passphrase_that_you_must_change_in_production"
-container_keystone_federation_oidc_metadata_folder: "{{ '/etc/apache2/metadata' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/metadata' }}"
-container_keystone_federation_oidc_idp_certificate_folder: "{{ '/etc/apache2/cert' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/cert' }}"
-host_keystone_federation_oidc_metadata_folder: "{{ node_config_directory }}/keystone/metadata"
-host_keystone_federation_oidc_idp_certificate_folder: "{{ node_config_directory }}/keystone/cert"
+keystone_federation_oidc_metadata: "{{ '/etc/apache2/metadata' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/metadata' }}"
+keystone_federation_oidc_certificate: "{{ '/etc/apache2/cert' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/cert' }}"
+keystone_federation_openid_discovery_url:
 
 # This variables is used to define multiple trusted Horizon dashboards.
 # horizon_trusted_dashboards: ['<https://dashboardServerOne/auth/websso/>', '<https://dashboardServerTwo/auth/websso/>', '<https://dashboardServerN/auth/websso/>']
 horizon_trusted_dashboards: ["{{ public_protocol }}://{{kolla_external_fqdn}}/auth/websso/"]
+
+enable_keystone_federation_openid: "{{ keystone_identity_providers | default([]) | selectattr('protocol','equalto','openid') | list | count > 0 }}"
+enable_keystone_federation_saml: "{{ keystone_identity_providers | default([]) | selectattr('protocol','equalto','saml') | list | count > 0 }}"
