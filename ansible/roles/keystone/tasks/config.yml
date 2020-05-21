@@ -1,32 +1,4 @@
 ---
-- name: Check if OpenID Connect and SAML are enabled for OpenStack federation
-  set_fact:
-    keystone_federated_protocol_openid_enabled: "{{(keystone_federated_protocol_openid_enabled is defined and keystone_federated_protocol_openid_enabled) or item.protocol == 'openid'}}"
-    keystone_federated_protocol_saml_enabled: "{{(keystone_federated_protocol_saml_enabled is defined and keystone_federated_protocol_saml_enabled) or item.protocol == 'saml'}}"
-  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0)
-  with_items: "{{identity_providers}}"
-
-- name: Check if the OpenID Connect protocol should be used
-  set_fact:
-    should_use_oidc: "{{ keystone_federated_protocol_openid_enabled is defined and keystone_federated_protocol_openid_enabled }}"
-
-- name: Check if the SAML protocol should be used
-  set_fact:
-    should_use_saml: "{{ keystone_federated_protocol_saml_enabled is defined and keystone_federated_protocol_saml_enabled }}"
-
-# NOTE(pem): Variable used to control the cleanup of attribute mappings that
-# are in OpenStack, but not in Kolla-Ansible configuration files.
-# For security reasons the default is set to False
-- set_fact: should_remove_attribute_mappings=False
-  when: should_remove_attribute_mappings is not defined
-
-
-# NOTE(pem): Variable used to control the cleanup of identity providers that
-# are integrated with OpenStack, but not in Kolla-Ansible configuration files.
-# For security reasons the default is set to False
-- set_fact: should_remove_identity_providers=False
-  when: should_remove_identity_providers is not defined
-
 - name: Ensuring config directories exist
   file:
     path: "{{ node_config_directory }}/{{ item.key }}"
@@ -75,49 +47,60 @@
   notify:
     - Restart {{ item.key }} container
 
-- name: Copying 'create_oidc_idp_metadata_and_certificate_files.py' to the Apache HTTPD folder
-  template:
-    src: create_oidc_idp_metadata_and_certificate_files.py.j2
-    dest: "{{ node_config_directory }}keystone/create_oidc_idp_metadata_and_certificate_files.py"
-    mode: 0755
-  when: identity_providers is defined and keystone_federated_protocol_openid_enabled
-
-- name: Remove all metadata and certificate files. They will be added/updated again in the next task. This ensures that the metadata from removed IdPs are cleaned up
+- name: Remove all OpenID metadata and certificate files
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
   file:
     state: absent
-    path: "{{ item }}/"
-  when: item is defined and item | trim | length > 0
+    path: "{{ node_config_directory }}/keystone/{{ item }}"
   with_items:
-    - "{{ host_keystone_federation_oidc_metadata_folder }}"
-    - "{{ host_keystone_federation_oidc_idp_certificate_folder }}"
+    - metadata
+    - cert
+  when:
+    - inventory_hostname in groups[keystone.group]
+    - keystone.enabled | bool
 
-- name: Creating Identity providers certificates directory
+- name: Create OpenID configuration directories
+  vars:
+    keystone: "{{ keystone_services.keystone }}"
   file:
-    dest: "{{ host_keystone_federation_oidc_idp_certificate_folder }}"
+    dest: "{{ node_config_directory }}/keystone/{{ item }}"
     state: "directory"
     mode: "0770"
   become: true
-  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.protocol == 'openid'
+  with_items:
+    - metadata
+    - cert
+  when:
+    - enable_keystone_federation_openid | bool
+    - inventory_hostname in groups[keystone.group]
+    - keystone.enabled | bool
 
-- name: Creating Identity providers metadata directory
-  file:
-    dest: "{{ host_keystone_federation_oidc_metadata_folder }}"
-    state: "directory"
-    mode: "0770"
-  become: true
-  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.protocol == 'openid'
-
-- name: Configure the metadata files for OpenID Connect IdPs
-  shell: >
-    python "{{ node_config_directory }}keystone/create_oidc_idp_metadata_and_certificate_files.py" "{{item.identifier}}" "{{item.client_id}}" "{{item.client_secret}}" "{{item.certificate_url}}" "{{item.key_id}}" "{{item.certificate_transformer}}" "{{item.key_transformer}}"
+- name: Configure the metadata files for OpenID IdPs
+  vars:
+      keystone: "{{ keystone_services.keystone }}"
+  script: >
+    openid_gen_metadata_and_certs.py \
+    --output-dir={{ node_config_directory }}/keystone \
+    --identity-provider-url={{ item.identifier }} \
+    --client-id="{{ item.client_id }}" \
+    --client-secret="{{ item.client_secret }}" \
+    --jwt-certificate-path="{{ item.certificate_url|default("") }}" \
+    --jwt-certificate-transformer="{{ item.certificate_transformer|default("") }}" \
+    --jwt-key-path="{{ item.key_id|default("") }}" \
+    --jwt-key-transformer="{{ item.key_transformer|default("") }}"
   register: certificate_key_ids
-  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.protocol == 'openid'
-  with_items: "{{identity_providers}}"
+  when:
+    - item.protocol == 'openid'
+    - inventory_hostname in groups[keystone.group]
+    - keystone.enabled | bool
+  with_items: "{{ keystone_identity_providers | default([]) }}"
+  loop_control:
+    label: "{{ item.client_id }} ({{ item.protocol }})"
 
 - name: Setting the certificates variable
   set_fact:
-    certificate_key_ids: "{{ certificate_key_ids.results | map(attribute='stdout') | map('regex_replace', '(.*)', '\\1#' + container_keystone_federation_oidc_idp_certificate_folder + '/\\1.pem') | join(' ') }}"
-  when: identity_providers is defined and identity_providers is not none and (identity_providers | length > 0) and item.protocol == 'openid'
+    certificate_key_ids: "{{ certificate_key_ids.results | map(attribute='stdout') | map('trim') | select | map('regex_replace', '(.*)', '\\1#' + keystone_federation_oidc_certificate + '/\\1.pem') | list }}"
 
 - name: Copying over keystone.conf
   vars:

@@ -39,36 +39,42 @@ LogLevel info
     CustomLog "{{ keystone_log_dir }}/keystone-apache-public-access.log" logformat
     {{ keystone_wsgi_public_vhost_config | indent(4) }}
 
-    {% if should_use_oidc %}
+{% if enable_keystone_federation_openid %}
     OIDCClaimPrefix "OIDC-"
+    OIDCClaimDelimiter ";"
     OIDCResponseType "id_token"
     OIDCScope "openid email profile"
-    OIDCMetadataDir {{container_keystone_federation_oidc_metadata_folder}}
-    OIDCOAuthVerifyCertFiles {{ certificate_key_ids }}
-
-    OIDCCryptoPassphrase {{oidc_crypto_passphrase}}
-
-    OIDCRedirectURI {{keystone_public_url}}/redirect_uri
+    OIDCMetadataDir {{ keystone_federation_oidc_metadata }}
+{% if certificate_key_ids | length > 0 %}
+    OIDCOAuthVerifyCertFiles {{ certificate_key_ids | join(" ") }}
+{% endif %}
+    OIDCCryptoPassphrase {{ keystone_federation_openid_crypto_password }}
+    OIDCRedirectURI {{ keystone_public_url }}/redirect_uri
+    {# NOTE(jasonanderson): this requires Keystone change Icb77ea82a69a6766d412543d3c2fe75a736bf212 -#}
+    OIDCDiscoverURL {{ keystone_public_url }}/v3/auth/OS-FEDERATION/websso/openid/discover
 
     <Location ~ "/redirect_uri">
-      AuthType auth-openidc
       Require valid-user
+      AuthType openid-connect
       LogLevel debug
     </Location>
 
-
-    <LocationMatch /auth/OS-FEDERATION/identity_providers/.*?/protocols/openid/websso>
+    {# WebSSO authentication endpoint -#}
+    <LocationMatch /v3/auth/OS-FEDERATION/identity_providers/.*?/protocols/openid/websso>
+      Require valid-user
       AuthType openid-connect
-      Require valid-user
       LogLevel debug
     </LocationMatch>
 
-    <LocationMatch /OS-FEDERATION/identity_providers/.*?/protocols/openid/auth>
-      AuthType auth-openidc
+    {# CLI / API authentication endpoint -#}
+    <LocationMatch /v3/OS-FEDERATION/identity_providers/.*?/protocols/openid/auth>
       Require valid-user
+      {# Note(jasonanderson): `auth-openidc` is a special auth type that can -#}
+      {# additionally handle verifying bearer tokens -#}
+      AuthType auth-openidc
       LogLevel debug
     </LocationMatch>
-    {% endif %}
+{% endif %}
 </VirtualHost>
 
 <VirtualHost *:{{ keystone_admin_listen_port }}>
