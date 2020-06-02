@@ -176,8 +176,15 @@ operator needs to create ``/etc/kolla/config/global.conf`` with content:
    [database]
    max_pool_size = 100
 
-OpenStack policy customisation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Custom policy files
+^^^^^^^^^^^^^^^^^^^
+
+In case the operators want to customize ``policy.json`` file, they should
+create a full policy file for specific project in the same directory like above
+and Kolla will overwrite default policy file with it. Be aware, with some
+projects are keeping full policy file in source code, operators just need to
+copy it but with some others are defining default rules in codebase, they have
+to generate it.
 
 OpenStack services allow customisation of policy. Since the Queens release,
 default policy configuration is defined within the source code for each
@@ -192,8 +199,42 @@ it allows for the use of comments.
 For example, to customise the Neutron policy in YAML format, the operator
 should add the customised rules in ``/etc/kolla/config/neutron/policy.yaml``.
 
-The operator can make these changes after services have been deployed by using
-the following command:
+Custom Horizon OpenRC template
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Operators can place a ``openrc.sh.template`` file in Horizon's service
+configuration directory in order to override the default OpenRC template.
+For more information on how this works, please refer to the documentation on
+Horizon's  `OPENRC_CUSTOM_TEMPLATE <https://docs.openstack.org/horizon/latest/configuration/settings.html#openrc-custom-template>`_
+setting.
+
+This template is rendered by Horizon when a user requests their OpenRC file,
+and the template engine is the same as used by Kolla-Ansible. Thus, you must be
+careful when writing your template. If you do not wish to have any values
+templated by Kolla-Ansible, use the ``{% raw %}`` block instruction to tell
+Kolla-Ansible not to perform templating on the parts that should be templated
+by Horizon, for example:
+
+.. path /etc/kolla/config/horizon/openrs.sh.template
+.. code-block:: jinja
+
+   {# The text within the raw block will _not_ be templated by Kolla-Ansible #}
+   {% raw %}
+   {% load shellfilter %}#!/usr/bin/env bash
+   export OS_AUTH_URL={{ auth_url }}
+   {% endraw %}
+   {# This section will be templated by Kolla-Ansible #}
+   export OS_REGION_NAME={{ openstack_region_name }}
+
+It may be helpful to refer to the `OpenRC template <https://opendev.org/openstack/horizon/src/branch/master/openstack_dashboard/dashboards/project/api_access/templates/api_access/openrc.sh.template>`_
+that ships with Horizon to see what template variables are available to Horizon
+when it is rendering the template.
+
+Applying changes
+^^^^^^^^^^^^^^^^
+
+The operator can make these changes after services were already deployed by
+using following command:
 
 .. code-block:: console
 

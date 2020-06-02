@@ -60,6 +60,49 @@
   notify:
     - Restart horizon container
 
+- name: Checking whether openrc.sh.template file exists
+  vars:
+    horizon: "{{ horizon_services['horizon'] }}"
+  local_action: stat path="{{ item }}"
+  run_once: True
+  register: check_openrc_template
+  with_first_found:
+    - files:
+        - "openrc.sh.template"
+      paths:
+        - "{{ node_custom_config }}/horizon/{{ inventory_hostname }}/"
+        - "{{ node_custom_config }}/horizon/"
+      skip: true
+  when:
+    - horizon.enabled | bool
+    - inventory_hostname in groups[horizon.group]
+
+- name: Copying over openrc.sh.template
+  vars:
+    horizon: "{{ horizon_services['horizon'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/horizon/openrc.sh.template"
+    mode: "0660"
+  become: true
+  with_first_found:
+    - files:
+        - "openrc.sh.template"
+      paths:
+        - "{{ node_custom_config }}/horizon/{{ inventory_hostname }}/"
+        - "{{ node_custom_config }}/horizon/"
+      skip: true
+  when:
+    - horizon.enabled | bool
+    - inventory_hostname in groups[horizon.group]
+    - check_openrc_template.results.0.stat.exists
+  notify:
+    - Restart horizon container
+
+- name: Set custom openrc fact
+  set_fact:
+    custom_openrc: check_openrc_template.stat.exists
+
 - name: Copying over horizon.conf
   become: true
   vars:

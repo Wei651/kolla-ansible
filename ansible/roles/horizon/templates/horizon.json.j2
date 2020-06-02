@@ -19,6 +19,13 @@
         },
 {% endfor %}
         {
+            "source": "{{ container_config_directory }}/openrc.sh.template",
+            "dest": "/etc/openstack-dashboard/templates/openrc.sh.template",
+            "owner": "horizon",
+            "perm": "0600",
+            "optional": true
+        },
+        {
             "source": "{{ container_config_directory }}/local_settings",
             "dest": "/etc/openstack-dashboard/local_settings",
             "owner": "horizon",
