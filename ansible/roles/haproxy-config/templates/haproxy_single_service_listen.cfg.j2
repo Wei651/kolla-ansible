@@ -11,11 +11,16 @@ userlist {{ service_name }}-user
                        service_mode, external,
                        haproxy_http_extra, haproxy_tcp_extra, host_group,
                        custom_member_list, auth_user, auth_pass) %}
+    {%- set letsencrypt_service = external|bool and enable_letsencrypt|bool and service_port|string == '80' %}
 listen {{ service_name }}
     {% if service_mode == 'redirect' %}
     mode http
     {% else %}
     mode {{ service_mode }}
+    {% endif %}
+    {% if letsencrypt_service %}
+    acl letsencrypt_acl path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt_acme_challenge_server if letsencrypt_acl
     {% endif %}
     {% if service_mode == 'http' %}
         {# Set up auth if required #}
@@ -50,13 +55,9 @@ listen {{ service_name }}
         {% endif %}
     {% endif %}
     {{ "bind %s:%s %s"|e|format(vip_address, service_port, tls_option)|trim() }}
-    {% if external|bool and enable_letsencrypt|bool and service_port == 80 %}
-    acl letsencrypt_acl path_beg /.well-known/acme-challenge/
-    use_backend letsencrypt_acme_challenge_server if letsencrypt_acl
-    {% endif %}
     {# Redirect mode sets a redirect scheme instead of members #}
     {% if service_mode == 'redirect' %}
-    redirect scheme https code 301 if !{ ssl_fc }
+    redirect scheme https code 301 unless { ssl_fc } {% if letsencrypt_service %}or letsencrypt_acl{% endif %}
     {% else %}
         {% if custom_member_list is not none %}
             {% for custom_member in custom_member_list %}
