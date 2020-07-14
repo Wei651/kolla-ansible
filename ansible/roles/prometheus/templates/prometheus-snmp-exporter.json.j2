@@ -1,0 +1,18 @@
+{
+    "command": "/opt/prometheus_snmp_exporter/snmp_exporter --config.file=/etc/prometheus/snmp.yml --web.listen-address={{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_snmp_exporter_port }}",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/snmp.yml",
+            "dest": "/etc/prometheus/snmp.yml",
+            "owner": "prometheus",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/prometheus",
+            "owner": "prometheus:kolla",
+            "recurse": true
+        }
+    ]
+}

@@ -425,6 +425,8 @@ prometheus_elasticsearch_exporter_port: "9108"
 # Prometheus blackbox-exporter ports
 prometheus_blackbox_exporter_port: "9115"
 
+prometheus_snmp_exporter_port: "9116"
+
 qdrouterd_port: "31459"
 
 qinling_api_port: "7070"
@@ -1137,6 +1139,7 @@ enable_prometheus_ceph_mgr_exporter: "{{ enable_ceph | bool and enable_prometheu
 enable_prometheus_openstack_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enable_elasticsearch | bool }}"
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
+enable_prometheus_snmp_exporter: "{{ enable_prometheus | bool }}"
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
