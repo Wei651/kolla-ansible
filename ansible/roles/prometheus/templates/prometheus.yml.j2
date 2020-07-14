@@ -189,6 +189,15 @@ scrape_configs:
         replacement: '{{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_blackbox_exporter_port }}'
 {% endif %}
 
+{% if enable_prometheus_pushgateway | bool %}
+  - job_name: pushgateway
+    static_configs:
+      - targets:
+{% for host in groups["prometheus-pushgateway"] %}
+        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_pushgateway_port'] }}'
+{% endfor %}
+{% endif %}
+
 {% if enable_prometheus_alertmanager | bool %}
   - job_name: alertmanager
     static_configs:

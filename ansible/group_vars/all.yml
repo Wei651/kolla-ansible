@@ -443,6 +443,7 @@ placement_api_port: "8780"
 placement_api_listen_port: "{{ placement_api_port }}"
 
 prometheus_port: "9091"
+prometheus_pushgateway_port: "9099"
 prometheus_node_exporter_port: "9100"
 prometheus_mysqld_exporter_port: "9104"
 prometheus_haproxy_exporter_port: "9101"
@@ -1104,6 +1105,7 @@ use_common_mariadb_user: "no"
 # Prometheus
 ############
 enable_prometheus_server: "{{ enable_prometheus | bool }}"
+enable_prometheus_pushgateway: "{{ enable_prometheus | bool }}"
 enable_prometheus_haproxy_exporter: "{{ enable_haproxy | bool }}"
 enable_prometheus_mysqld_exporter: "{{ enable_mariadb | bool }}"
 enable_prometheus_node_exporter: "{{ enable_prometheus | bool }}"
