@@ -97,6 +97,33 @@
   notify:
     - Restart prometheus-server container
 
+- name: Find custom alertmanager template files
+  become: true
+  local_action:
+    module: find
+    path: "{{ node_custom_config }}/prometheus/"
+    pattern: "*.tmpl"
+  run_once: True
+  register: prometheus_alert_templates
+  when:
+    - enable_prometheus_alertmanager | bool
+
+- name: Copying over custom prometheus alert rules files
+  become: true
+  vars:
+    service: "{{ prometheus_services['prometheus-alertmanager']}}"
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ node_config_directory }}/prometheus-alertmanager/{{ item.path | basename }}"
+    mode: "0660"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool and enable_prometheus_alertmanager | bool
+    - prometheus_alert_templates is defined and prometheus_alert_templates.files | length > 0
+  with_items: "{{ prometheus_alert_templates.files }}"
+  notify:
+    - Restart prometheus-alertmanager container
+
 - name: Copying over prometheus alertmanager config file
   become: true
   vars:
