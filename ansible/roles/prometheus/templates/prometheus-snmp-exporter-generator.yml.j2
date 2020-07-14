@@ -1,0 +1,26 @@
+---
+modules:
+{% for module in prometheus_snmp_exporter_modules %}
+  {{ module.name }}:
+    version: 2
+    walk:
+      - system
+      - interfaces
+      - ifXTable
+    lookups:
+      - source_indexes: [ifIndex]
+        lookup: ifName
+    overrides:
+      ifAlias:
+        ignore: true # Lookup metric
+      ifDescr:
+        ignore: true # Lookup metric
+      ifName:
+        ignore: true # Lookup metric
+      ifType:
+        type: EnumAsInfo
+{% if module.community %}
+    auth:
+      community: {{ module.community }}
+{% endif %}
+{% endfor %}

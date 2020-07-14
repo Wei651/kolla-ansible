@@ -101,6 +101,13 @@ prometheus_services:
     image: "{{ prometheus_blackbox_exporter_image_full }}"
     volumes: "{{ prometheus_blackbox_exporter_default_volumes + prometheus_blackbox_exporter_extra_volumes }}"
     dimensions: "{{ prometheus_blackbox_exporter_dimensions }}"
+  prometheus-snmp-exporter:
+    container_name: "prometheus_snmp_exporter"
+    group: "prometheus-snmp-exporter"
+    enabled: "{{ enable_prometheus_snmp_exporter | bool }}"
+    image: "{{ prometheus_snmp_exporter_image_full }}"
+    volumes: "{{ prometheus_snmp_exporter_default_volumes + prometheus_snmp_exporter_extra_volumes }}"
+    dimensions: "{{ prometheus_snmp_exporter_dimensions }}"
 
 ####################
 # Database
@@ -119,6 +126,17 @@ prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bo
 #
 # For a list of modules see the alertmanager config.
 prometheus_blackbox_exporter_endpoints: []
+
+####################
+# SNMP
+####################
+
+# prometheus_snmp_exporter_modules:
+#   - name: dell_force10
+#     endpoints:
+#       - '10.0.0.1'
+#       - '10.0.0.2'
+prometheus_snmp_exporter_modules: []
 
 ####################
 # Docker
@@ -171,6 +189,13 @@ prometheus_blackbox_exporter_image: "{{ docker_registry ~ '/' if docker_registry
 prometheus_blackbox_exporter_tag: "{{ prometheus_tag }}"
 prometheus_blackbox_exporter_image_full: "{{ prometheus_blackbox_exporter_image }}:{{ prometheus_blackbox_exporter_tag }}"
 
+prometheus_snmp_exporter_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-snmp-exporter"
+prometheus_snmp_exporter_tag: "{{ prometheus_tag }}"
+prometheus_snmp_exporter_image_full: "{{ prometheus_snmp_exporter_image }}:{{ prometheus_snmp_exporter_tag }}"
+prometheus_snmp_exporter_generator_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-snmp-exporter-generator"
+prometheus_snmp_exporter_generator_tag: "{{ prometheus_tag }}"
+prometheus_snmp_exporter_generator_image_full: "{{ prometheus_snmp_exporter_generator_image }}:{{ prometheus_snmp_exporter_generator_tag }}"
+
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
 prometheus_pushgateway_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -182,6 +207,7 @@ prometheus_alertmanager_dimensions: "{{ default_container_dimensions }}"
 prometheus_openstack_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_elasticsearch_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_blackbox_exporter_dimensions: "{{ default_container_dimensions }}"
+prometheus_snmp_exporter_dimensions: "{{ default_container_dimensions }}"
 
 prometheus_server_default_volumes:
   - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -247,6 +273,10 @@ prometheus_blackbox_exporter_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
+prometheus_snmp_exporter_default_volumes:
+  - "{{ node_config_directory }}/prometheus-snmp-exporter/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "kolla_logs:/var/log/kolla/"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
@@ -268,3 +298,5 @@ prometheus_openstack_exporter_disabled_lb: "{{ '--disable-service.load-balancer 
 prometheus_openstack_exporter_disabled_items: "{{ [prometheus_openstack_exporter_disabled_volume, prometheus_openstack_exporter_disabled_dns, prometheus_openstack_exporter_disabled_object, prometheus_openstack_exporter_disabled_lb|trim]|join(' ')|trim }}"
 
 prometheus_cadvisor_cmdline_extras: "--docker_only --store_container_labels=false --disable_metrics=percpu,referenced_memory,cpu_topology,resctrl,udp,advtcp,sched,hugetlb,memory_numa,tcp,process"
+
+prometheus_snmp_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
