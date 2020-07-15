@@ -1145,10 +1145,18 @@ enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_snmp_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_jupyterhub_exporter: "{{ enable_jupyterhub | bool and enable_prometheus | bool }}"
 
+enable_prometheus_external: "no"
+
+prometheus_server_user: "admin"
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
 prometheus_elasticsearch_exporter_interval: "60s"
 prometheus_cmdline_extras:
+
+prometheus_internal_fqdn: "{{ kolla_internal_fqdn }}"
+prometheus_external_fqdn: "{{ kolla_external_fqdn }}"
+prometheus_alertmanager_internal_fqdn: "{{ kolla_internal_fqdn }}"
+prometheus_alertmanager_external_fqdn: "{{ kolla_external_fqdn }}"
 
 ############
 # Vitrage
