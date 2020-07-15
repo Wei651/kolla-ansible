@@ -15,6 +15,13 @@ prometheus_services:
         mode: "http"
         external: false
         port: "{{ prometheus_port }}"
+      prometheus_server_external:
+        enabled: "{{ enable_prometheus_external }}"
+        mode: "http"
+        external: true
+        port: "{{ prometheus_port }}"
+        auth_user: "{{ prometheus_user }}"
+        auth_pass: "{{ prometheus_password }}"
   prometheus-pushgateway:
     container_name: prometheus_pushgateway
     group: prometheus-pushgateway
@@ -113,6 +120,16 @@ prometheus_services:
 # Database
 ####################
 prometheus_mysql_exporter_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}prometheus{% endif %}"
+
+####################
+# Server
+####################
+prometheus_server_external_url: "{{ internal_protocol }}://{{ prometheus_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_port }}"
+
+####################
+# Alertmanager
+####################
+prometheus_alertmanager_external_url: "{{ internal_protocol }}://{{ prometheus_alertmanager_internal_fqdn | put_address_in_context('url') }}:{{ prometheus_alertmanager_port }}"
 
 ####################
 # Blackbox
