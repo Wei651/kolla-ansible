@@ -223,6 +223,19 @@ scrape_configs:
 {% endfor %}
 {% endif %}
 
+{% if enable_prometheus_jupyterhub_exporter | bool %}
+  - job_name: jupyterhub_exporter
+    honor_labels: true
+{% if prometheus_jupyterhub_exporter_token %}
+    bearer_token: '{{ prometheus_jupyterhub_exporter_token }}'
+{% endif %}
+    static_configs:
+      - targets:
+{% for host in groups['jupyterhub'] %}
+        - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_jupyterhub_exporter_port'] }}'
+{% endfor %}
+{% endif %}
+
 {% if enable_prometheus_alertmanager | bool %}
   - job_name: alertmanager
     static_configs:

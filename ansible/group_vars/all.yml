@@ -452,6 +452,7 @@ prometheus_rabbitmq_exporter_port: "15692"
 # Default cadvisor port of 8080 already in use
 prometheus_cadvisor_port: "18080"
 prometheus_fluentd_integration_port: "24231"
+prometheus_jupyterhub_exporter_port: "8075"
 
 # Prometheus alertmanager ports
 prometheus_alertmanager_port: "9093"
@@ -1121,6 +1122,7 @@ enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enabl
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rabbitmq | bool }}"
 enable_prometheus_snmp_exporter: "{{ enable_prometheus | bool }}"
+enable_prometheus_jupyterhub_exporter: "{{ enable_jupyterhub | bool and enable_prometheus | bool }}"
 
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
