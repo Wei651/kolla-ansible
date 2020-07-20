@@ -1,4 +1,20 @@
 ---
+- name: Copying Keystone IdP mappings
+  vars:
+    service: "{{ keystone_services.keystone }}"
+  copy:
+    src: "{{ item.file }}"
+    dest: "{{ node_config_directory }}/keystone/mappings/"
+    mode: "0660"
+  become: true
+  register: keystone_identity_mapping_files
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  with_items: "{{ keystone_identity_mappings }}"
+  notify:
+    - Restart keystone container
+
 - name: List configured attribute mappings (that can be used by IdPs)
   command: >
     docker exec -t keystone openstack \
@@ -33,35 +49,35 @@
 
 - name: Register attribute mappings in OpenStack
   command: >
-    openstack --os-auth-url={{ openstack_auth.auth_url }} \
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
     --os-password={{ openstack_auth.password }} \
     --os-username={{ openstack_auth.username }} \
     --os-project-name={{ openstack_auth.project_name }} \
     --os-identity-api-version={{ identity_api_version }} \
     mapping create \
-    --rules "{{ item.file }}" \
+    --rules "{{ container_config_directory }}/mappings/{{ item.file | basename }}" \
     {{ item.name }}
   run_once: True
   when:
     - item.name not in existing_mappings
   with_items: "{{ keystone_identity_mappings }}"
-  delegate_to: localhost
 
 - name: Update existing attribute mappings in OpenStack
   command: >
-    openstack --os-auth-url={{ openstack_auth.auth_url }} \
+    docker exec -t keystone openstack \
+    --os-auth-url={{ openstack_auth.auth_url }} \
     --os-password={{ openstack_auth.password }} \
     --os-username={{ openstack_auth.username }} \
     --os-project-name={{ openstack_auth.project_name }} \
     --os-identity-api-version={{ identity_api_version }} \
     mapping set \
-    --rules "{{ item.file }}" \
+    --rules "{{ container_config_directory }}/mappings/{{ item.file | basename }}" \
     {{ item.name }}
   run_once: True
   when:
     - item.name in existing_mappings
   with_items: "{{ keystone_identity_mappings }}"
-  delegate_to: localhost
 
 - name: List configured IdPs
   command: >
