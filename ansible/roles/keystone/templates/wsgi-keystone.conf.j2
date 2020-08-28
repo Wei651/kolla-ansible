@@ -66,6 +66,13 @@ LogLevel info
       LogLevel debug
     </LocationMatch>
 
+    {# WebSSO default redirect authentication endpoint -#}
+    <LocationMatch "^/v3/auth/OS-FEDERATION/websso/openid$">
+      Require valid-user
+      AuthType openid-connect
+      LogLevel debug
+    </LocationMatch>
+
     {# CLI / API authentication endpoint -#}
     <LocationMatch /v3/OS-FEDERATION/identity_providers/.*?/protocols/openid/auth>
       Require valid-user
