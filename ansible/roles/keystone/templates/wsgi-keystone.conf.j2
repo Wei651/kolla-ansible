@@ -85,6 +85,13 @@ LogLevel info
 {% endif %}
 {% endfor %}
 
+    {# WebSSO default redirect authentication endpoint -#}
+    <LocationMatch "^/v3/auth/OS-FEDERATION/websso/openid$">
+      Require valid-user
+      AuthType openid-connect
+      LogLevel debug
+    </LocationMatch>
+
     {# CLI / API authentication endpoint -#}
 {% for idp in keystone_identity_providers %}
 {% if idp.protocol == 'openid' %}
