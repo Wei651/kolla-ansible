@@ -57,6 +57,7 @@ LogLevel info
     OIDCClaimPrefix "OIDC-"
     OIDCClaimDelimiter ";"
     OIDCResponseType "id_token"
+    OIDCPassIDTokenAs claims payload
     OIDCScope "{{ keystone_federation_oidc_scopes }}"
     OIDCMetadataDir {{ keystone_container_federation_oidc_metadata_folder }}
 {% if keystone_federation_openid_certificate_key_ids | length > 0 %}
