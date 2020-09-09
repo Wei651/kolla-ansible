@@ -1,8 +1,8 @@
 ---
 - name: Copy over ceph.conf for Glance
   template:
-    src: "{{ node_custom_config }}/glance/ceph.conf"
-    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/glance-api/"
     mode: "0660"
   become: true
   when: inventory_hostname in groups['glance-api']

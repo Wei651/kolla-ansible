@@ -26,6 +26,13 @@
             "optional": true
         },
         {
+            "source": "{{ container_config_directory }}/clouds.yaml.template",
+            "dest": "/etc/openstack-dashboard/templates/clouds.yaml.template",
+            "owner": "horizon",
+            "perm": "0600",
+            "optional": true
+        },
+        {
             "source": "{{ container_config_directory }}/local_settings",
             "dest": "/etc/openstack-dashboard/local_settings",
             "owner": "horizon",
