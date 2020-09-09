@@ -214,6 +214,9 @@ OPENSTACK_HOST = "{{ kolla_internal_fqdn }}"
 {% if custom_openrc %}
 OPENRC_CUSTOM_TEMPLATE = "openrc.sh.template"
 {% endif %}
+{% if custom_clouds_yaml %}
+OPENSTACK_CLOUDS_YAML_CUSTOM_TEMPLATE = "clouds.yaml.template"
+{% endif %}
 
 OPENSTACK_KEYSTONE_URL = "{{ horizon_keystone_url }}"
 OPENSTACK_KEYSTONE_DEFAULT_ROLE = "{{ keystone_default_user_role }}"
