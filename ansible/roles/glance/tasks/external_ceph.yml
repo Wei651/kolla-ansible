@@ -1,8 +1,8 @@
 ---
 - name: Copy over ceph files
-  copy:
-    src: "{{ item }}"
-    dest: "{{ node_config_directory }}/glance-api/"
+  template:
+    src: "{{ node_custom_config }}/glance/ceph.conf"
+    dest: "{{ node_config_directory }}/glance-api/ceph.conf"
     mode: "0660"
   become: true
   when:
