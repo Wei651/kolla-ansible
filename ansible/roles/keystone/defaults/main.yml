@@ -166,7 +166,7 @@ remote_id_attribute_saml: "Shib-Identity-Provider"
 remote_id_attribute_oidc: "HTTP_OIDC_ISS"
 keystone_federation_oidc_metadata: "{{ '/etc/apache2/metadata' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/metadata' }}"
 keystone_federation_oidc_certificate: "{{ '/etc/apache2/cert' if kolla_base_distro in ['debian', 'ubuntu'] else '/etc/httpd/cert' }}"
-keystone_federation_openid_discovery_url:
+keystone_federation_oidc_allowed_redirects: []
 
 # This variables is used to define multiple trusted Horizon dashboards.
 # horizon_trusted_dashboards: ['<https://dashboardServerOne/auth/websso/>', '<https://dashboardServerTwo/auth/websso/>', '<https://dashboardServerN/auth/websso/>']
