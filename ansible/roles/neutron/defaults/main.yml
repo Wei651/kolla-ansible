@@ -8,7 +8,7 @@ neutron_services:
     enabled: true
     group: "neutron-server"
     host_in_groups: "{{ inventory_hostname in groups['neutron-server'] }}"
-    volumes: "{{ neutron_server_default_volumes + neutron_server_extra_volumes }}"
+    volumes: "{{ neutron_server_default_volumes + neutron_server_plugin_volumes + neutron_server_extra_volumes }}"
     dimensions: "{{ neutron_server_dimensions }}"
     healthcheck: "{{ neutron_server_healthcheck }}"
     haproxy:
@@ -480,6 +480,8 @@ neutron_server_default_volumes:
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_facts.os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
   - "{{ kolla_dev_repos_directory ~ '/neutron/neutron:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/neutron' if neutron_dev_mode | bool else '' }}"
+neutron_server_plugin_volumes_raw: "{% for plugin in neutron_dev_plugins %}{% for pkg in plugin.packages %}{{ kolla_dev_repos_directory ~ '/neutron-plugins/' ~ plugin.name ~ '/' ~ pkg ~ ':/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/' ~ pkg if neutron_dev_mode | bool else '' }},{% endfor %}{% endfor %}"
+neutron_server_plugin_volumes: "{{ neutron_server_plugin_volumes_raw.split(',') }}"
 neutron_bgp_dragent_default_volumes:
   - "{{ node_config_directory }}/neutron-bgp-dragent/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
@@ -748,6 +750,7 @@ neutron_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
 neutron_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
 neutron_dev_mode: "{{ kolla_dev_mode }}"
 neutron_source_version: "{{ kolla_source_version }}"
+neutron_dev_plugins: []
 
 ####################
 # Keystone

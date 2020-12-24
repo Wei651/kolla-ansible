@@ -6,3 +6,11 @@
     dest: "{{ kolla_dev_repos_directory }}/{{ project_name }}"
     update: "{{ neutron_dev_repos_pull }}"
     version: "{{ neutron_source_version }}"
+
+- name: Cloning neutron plugin source repositories for development
+  git:
+    repo: "{{ item.git_repository | default(kolla_dev_repos_directory ~ '/' ~ item.name) }}"
+    dest: "{{ kolla_dev_repos_directory }}/{{ project_name }}-plugins/{{ item.name }}"
+    update: "{{ item.repos_pull | default(neutron_dev_repos_pull) }}"
+    version: "{{ item.source_version | default(neutron_source_version) }}"
+  loop: "{{ neutron_dev_plugins }}"
