@@ -459,6 +459,10 @@ EOF
         ACTION="Generate TLS Certificates"
         PLAYBOOK="${BASEDIR}/ansible/certificates.yml"
         ;;
+(octavia-certificates)
+        ACTION="Generate octavia Certificates"
+        PLAYBOOK="${BASEDIR}/ansible/octavia-certificates.yml"
+        ;;
 (genconfig)
         ACTION="Generate configuration files for enabled OpenStack services"
         EXTRA_OPTS="$EXTRA_OPTS -e kolla_action=config"
