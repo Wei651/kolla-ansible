@@ -13,7 +13,9 @@
   with_dict: "{{ octavia_services }}"
 
 - name: Check if policies shall be overwritten
-  local_action: stat path="{{ item }}"
+  stat:
+    path: "{{ item }}"
+  delegate_to: localhost
   run_once: True
   register: octavia_policy
   with_first_found:
@@ -42,6 +44,10 @@
   with_dict: "{{ octavia_services }}"
   notify:
     - "Restart {{ item.key }} container"
+
+- include_tasks: copy-certs.yml
+  when:
+    - kolla_copy_ca_into_containers | bool
 
 - name: Copying over config.json files for services
   template:
@@ -75,6 +81,16 @@
   with_dict: "{{ octavia_services }}"
   notify:
     - "Restart {{ item.key }} container"
+
+- name: Copying over Octavia SSH key
+  copy:
+    content: "{{ octavia_amp_ssh_key.private_key }}"
+    dest: "{{ node_config_directory }}/octavia-worker/{{ octavia_amp_ssh_key_name }}"
+    owner: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+    mode: "0400"
+  become: True
+  when: inventory_hostname in groups[octavia_services['octavia-worker']['group']]
 
 - name: Copying certificate files for octavia-worker
   vars:

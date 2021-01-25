@@ -16,11 +16,13 @@ ca_certificate = /etc/octavia/certs/server_ca.cert.pem
 {% if enable_barbican | bool %}
 region_name = {{ openstack_region_name }}
 endpoint_type = internal
+ca_certificates_file = {{ openstack_cacert }}
 {% endif %}
 
 [haproxy_amphora]
 server_ca = /etc/octavia/certs/server_ca.cert.pem
 client_cert = /etc/octavia/certs/client.cert-and-key.pem
+bind_port = {{ octavia_amp_listen_port }}
 
 [database]
 connection = mysql+pymysql://{{ octavia_database_user }}:{{ octavia_database_password }}@{{ octavia_database_address }}/{{ octavia_database_name }}
@@ -36,6 +38,7 @@ password = {{ octavia_keystone_password }}
 user_domain_name = {{ default_user_domain_name }}
 project_name = {{ octavia_service_auth_project }}
 project_domain_name = {{ default_project_domain_name }}
+cafile = {{ openstack_cacert }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
@@ -50,6 +53,7 @@ user_domain_id = {{ default_user_domain_id }}
 project_name = service
 username = {{ octavia_keystone_user }}
 password = {{ octavia_keystone_password }}
+cafile = {{ openstack_cacert }}
 
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = {{ memcache_secret_key }}
@@ -65,11 +69,29 @@ stats_update_threads = {{ openstack_service_workers }}
 health_update_threads = {{ openstack_service_workers }}
 
 [controller_worker]
+amp_ssh_key_name = {{ octavia_amp_ssh_key_name }}
+amp_image_tag = {{ octavia_amp_image_tag }}
+
+{% if not octavia_auto_configure | bool %}
+{% if octavia_amp_image_owner_id is defined %}
+amp_image_owner_id = {{ octavia_amp_image_owner_id }}
+{% endif %}
+{% if octavia_amp_boot_network_list is defined %}
 amp_boot_network_list = {{ octavia_amp_boot_network_list }}
-amp_image_tag = amphora
+{% endif %}
+{% if octavia_amp_secgroup_list is defined %}
 amp_secgroup_list = {{ octavia_amp_secgroup_list }}
+{% endif %}
+{% if octavia_amp_flavor_id is defined %}
 amp_flavor_id = {{ octavia_amp_flavor_id }}
-amp_ssh_key_name = octavia_ssh_key
+{% endif %}
+{% else %}
+amp_image_owner_id = {{ project_info.openstack_projects.0.id }}
+amp_boot_network_list = {{ network_info.id }}
+amp_secgroup_list = {{ (sec_grp_info.results | selectattr('secgroup.name', 'equalto', octavia_amp_security_groups['mgmt-sec-grp'].name) | list).0.secgroup.id }}
+amp_flavor_id = {{ amphora_flavor_info.id }}
+{% endif %}
+
 client_ca = /etc/octavia/certs/client_ca.cert.pem
 network_driver = allowed_address_pairs_driver
 compute_driver = compute_nova_driver
@@ -85,6 +107,12 @@ rpc_thread_pool_size = 2
 [oslo_messaging_notifications]
 transport_url = {{ notify_transport_url }}
 
+{% if om_enable_rabbitmq_tls | bool %}
+[oslo_messaging_rabbit]
+ssl = true
+ssl_ca_file = {{ om_rabbitmq_cacert }}
+{% endif %}
+
 {% if octavia_policy_file is defined %}
 [oslo_policy]
 policy_file = {{ octavia_policy_file }}
@@ -93,11 +121,14 @@ policy_file = {{ octavia_policy_file }}
 [glance]
 region_name = {{ openstack_region_name }}
 endpoint_type = internal
+ca_certificates_file = {{ openstack_cacert }}
 
 [neutron]
 region_name = {{ openstack_region_name }}
 endpoint_type = internal
+ca_certificates_file = {{ openstack_cacert }}
 
 [nova]
 region_name = {{ openstack_region_name }}
 endpoint_type = internal
+ca_certificates_file = {{ openstack_cacert }}
