@@ -1,4 +1,10 @@
 ---
+- import_role:
+    name: service-precheck
+  vars:
+    service_precheck_services: "{{ octavia_services }}"
+    service_name: "{{ project_name }}"
+
 - name: Get container facts
   become: true
   kolla_container_facts:
@@ -34,10 +40,12 @@
     msg: >-
       Octavia's certificate configuration has been changed since Train. The new
       configuration requires 4 PEM files. Please check certificate configuration
-      guide at https://docs.openstack.org/octavia/train/admin/guides/certificates.html
+      guide at https://docs.openstack.org/octavia/latest/admin/guides/certificates.html
 
 - name: Checking certificate files exist for octavia
-  local_action: stat path="{{ node_custom_config }}/octavia/{{ item }}"
+  stat:
+    path: "{{ node_custom_config }}/octavia/{{ item }}"
+  delegate_to: localhost
   run_once: True
   register: result
   failed_when: not result.stat.exists
