@@ -79,3 +79,16 @@
     - name: Assert result is changed
       assert:
         that: result is changed
+
+    - name: Test for nested structures in args
+      kolla_toolbox:
+        module_name: set_fact
+        module_args:
+          foo:
+            - key: value
+              nested:
+                - bar
+
+    - name: Assert nested structures passed correctly
+      assert:
+        that: foo[0]['nested'][0] is 'bar'
