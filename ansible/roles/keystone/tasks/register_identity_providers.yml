@@ -111,6 +111,19 @@
     - item not in (keystone_identity_providers | map(attribute='name') | list)
     - should_remove_identity_providers | default(False)
 
+- name: Register IdP domains
+  kolla_toolbox:
+    module_name: os_keystone_domain
+    module_args:
+      auth: "{{ openstack_auth }}"
+      name: "{{ item.domain_name }}"
+      description: "Identity domain for {{ item.name }}"
+  run_once: True
+  delegate_to: "{{ groups['control'][0] }}"
+  loop: "{{ keystone_identity_providers }}"
+  when:
+    - item.domain_name is defined
+
 - name: Register Identity Providers in OpenStack
   command: >
     docker exec -t keystone openstack \
