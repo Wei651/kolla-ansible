@@ -12,5 +12,11 @@
         mode: 0600
       run_once: True
 
+    - import_role:
+        name: octavia
+        tasks_from: openrc.yml
+      when: enable_octavia | bool
+
 - import_playbook: "{{ post_deploy_extra_play }}"
   when: post_deploy_extra_play is defined
+
