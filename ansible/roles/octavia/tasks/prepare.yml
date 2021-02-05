@@ -40,7 +40,7 @@
 - name: Get {{ octavia_service_auth_project }} project id
   become: True
   kolla_toolbox:
-    module_name: os_project_info
+    module_name: os_project_facts
     module_args:
       auth: "{{ octavia_user_auth }}"
       cacert: "{{ openstack_cacert }}"
