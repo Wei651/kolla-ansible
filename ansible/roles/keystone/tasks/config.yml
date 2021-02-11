@@ -92,6 +92,7 @@
   register: certificate_key_ids
   when:
     - item.protocol == 'openid'
+    - enable_keystone_federation_openid | bool
     - inventory_hostname in groups[keystone.group]
     - keystone.enabled | bool
   with_items: "{{ keystone_identity_providers | default([]) }}"
