@@ -102,6 +102,8 @@
 - name: Setting the certificates variable
   set_fact:
     certificate_key_ids: "{{ certificate_key_ids.results | map(attribute='stdout') | map('trim') | select | map('regex_replace', '(.*)', '\\1#' + keystone_federation_oidc_certificate + '/\\1.pem') | list }}"
+  when:
+    - certificate_key_ids is defined
 
 - name: Copying over keystone.conf
   vars:
