@@ -91,8 +91,8 @@
     --jwt-key-transformer="{{ item.key_transformer|default("") }}"
   register: certificate_key_ids
   when:
-    - item.protocol == 'openid'
     - enable_keystone_federation_openid | bool
+    - item.protocol == 'openid'
     - inventory_hostname in groups[keystone.group]
     - keystone.enabled | bool
   with_items: "{{ keystone_identity_providers | default([]) }}"
@@ -104,6 +104,7 @@
     certificate_key_ids: "{{ certificate_key_ids.results | map(attribute='stdout') | map('trim') | select | map('regex_replace', '(.*)', '\\1#' + keystone_federation_oidc_certificate + '/\\1.pem') | list }}"
   when:
     - certificate_key_ids is defined
+    - enable_keystone_federation_openid | bool
 
 - name: Copying over keystone.conf
   vars:
