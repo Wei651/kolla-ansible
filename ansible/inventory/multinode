@@ -809,3 +809,12 @@ letsencrypt
 
 [letsencrypt-certbot:children]
 letsencrypt
+
+[doni:children]
+control
+
+[doni-api:children]
+doni
+
+[doni-worker:children]
+doni

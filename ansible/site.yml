@@ -32,6 +32,7 @@
         - enable_congress_{{ enable_congress | bool }}
         - enable_cyborg_{{ enable_cyborg | bool }}
         - enable_designate_{{ enable_designate | bool }}
+        - enable_doni_{{ enable_doni | bool }}
         - enable_elasticsearch_{{ enable_elasticsearch | bool }}
         - enable_etcd_{{ enable_etcd | bool }}
         - enable_freezer_{{ enable_freezer | bool }}
@@ -164,6 +165,11 @@
             tasks_from: loadbalancer
           tags: cyborg
           when: enable_cyborg | bool
+        - include_role:
+            role: doni
+            tasks_from: loadbalancer
+          tags: doni
+          when: enable_doni | bool
         - include_role:
             role: designate
             tasks_from: loadbalancer
@@ -1288,3 +1294,15 @@
     - { role: letsencrypt,
         tags: letsencrypt,
         when: enable_letsencrypt | bool }
+
+- name: Apply role doni
+  gather_facts: false
+  hosts:
+    - doni-api
+    - doni-worker
+    - '&enable_doni_True'
+  serial: '{{ kolla_serial|default("0") }}'
+  roles:
+    - { role: doni,
+        tags: doni,
+        when: enable_doni | bool }

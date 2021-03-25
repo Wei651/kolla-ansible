@@ -1,0 +1,24 @@
+{
+    "command": "doni-worker",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/doni.conf",
+            "dest": "/etc/doni/doni.conf",
+            "owner": "doni",
+            "perm": "0600"
+        }{% if doni_policy_file is defined %},
+        {
+            "source": "{{ container_config_directory }}/{{ doni_policy_file }}",
+            "dest": "/etc/doni/{{ doni_policy_file }}",
+            "owner": "doni",
+            "perm": "0600"
+        }{% endif %}
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/doni",
+            "owner": "doni:doni",
+            "recurse": true
+        }
+    ]
+}

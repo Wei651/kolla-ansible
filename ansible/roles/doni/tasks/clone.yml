@@ -1,0 +1,7 @@
+---
+- name: Cloning doni source repository for development
+  git:
+    repo: "{{ doni_git_repository }}"
+    dest: "{{ kolla_dev_repos_directory }}/{{ project_name }}"
+    update: "{{ doni_dev_repos_pull }}"
+    version: "{{ doni_source_version }}"
