@@ -1,0 +1,129 @@
+---
+project_name: "doni"
+
+doni_services:
+  doni-api:
+    container_name: doni_api
+    group: doni-api
+    enabled: true
+    image: "{{ doni_api_image_full }}"
+    volumes: "{{ doni_api_default_volumes + doni_api_extra_volumes }}"
+    dimensions: "{{ doni_api_dimensions }}"
+    haproxy:
+      doni_api:
+        enabled: "{{ enable_doni }}"
+        mode: "http"
+        external: false
+        port: "{{ doni_api_port }}"
+        listen_port: "{{ doni_api_listen_port }}"
+      doni_api_external:
+        enabled: "{{ enable_doni }}"
+        mode: "http"
+        external: true
+        port: "{{ doni_api_port }}"
+        listen_port: "{{ doni_api_listen_port }}"
+  doni-worker:
+    container_name: doni_worker
+    group: doni-worker
+    enabled: true
+    image: "{{ doni_worker_image_full }}"
+    privileged: True
+    volumes: "{{ doni_worker_default_volumes + doni_worker_extra_volumes }}"
+    dimensions: "{{ doni_worker_dimensions }}"
+
+
+####################
+# Database
+####################
+doni_database_name: "doni"
+doni_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}doni{% endif %}"
+doni_database_address: "{{ database_address | put_address_in_context('url') }}:{{ database_port }}"
+
+
+####################
+# Docker
+####################
+doni_install_type: "{{ kolla_install_type }}"
+doni_tag: "{{ openstack_tag }}"
+
+doni_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ doni_install_type }}-doni-api"
+doni_api_tag: "{{ doni_tag }}"
+doni_api_image_full: "{{ doni_api_image }}:{{ doni_api_tag }}"
+
+doni_worker_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ doni_install_type }}-doni-worker"
+doni_worker_tag: "{{ doni_tag }}"
+doni_worker_image_full: "{{ doni_worker_image }}:{{ doni_worker_tag }}"
+
+doni_api_dimensions: "{{ default_container_dimensions }}"
+doni_worker_dimensions: "{{ default_container_dimensions }}"
+
+doni_api_default_volumes:
+  - "{{ node_config_directory }}/doni-api/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla"
+  - "{{ kolla_dev_repos_directory ~ '/doni/doni:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/doni' if doni_dev_mode | bool else '' }}"
+doni_worker_default_volumes:
+  - "{{ node_config_directory }}/doni-worker/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla"
+  - "{{ kolla_dev_repos_directory ~ '/doni/doni:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/doni' if doni_dev_mode | bool else '' }}"
+
+doni_extra_volumes: "{{ default_extra_volumes }}"
+doni_api_extra_volumes: "{{ doni_extra_volumes }}"
+doni_worker_extra_volumes: "{{ doni_extra_volumes }}"
+
+####################
+# OpenStack
+####################
+doni_admin_endpoint: "{{ admin_protocol }}://{{ doni_internal_fqdn | put_address_in_context('url') }}:{{ doni_api_port }}"
+doni_internal_endpoint: "{{ internal_protocol }}://{{ doni_internal_fqdn | put_address_in_context('url') }}:{{ doni_api_port }}"
+doni_public_endpoint: "{{ public_protocol }}://{{ doni_external_fqdn | put_address_in_context('url') }}:{{ doni_api_port }}"
+
+doni_logging_debug: "{{ openstack_logging_debug }}"
+
+doni_keystone_user: "doni"
+
+openstack_doni_auth: "{{ openstack_auth }}"
+
+
+#########
+# doni
+#########
+
+####################
+## Kolla
+#####################
+doni_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
+doni_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
+doni_dev_mode: "{{ kolla_dev_mode }}"
+doni_source_version: "{{ kolla_source_version }}"
+
+
+####################
+# Notifications
+####################
+doni_notification_topics:
+  - name: notifications
+    enabled: "{{ enable_ceilometer | bool }}"
+
+doni_enabled_notification_topics: "{{ doni_notification_topics | selectattr('enabled', 'equalto', true) | list }}"
+
+####################
+# Keystone
+####################
+doni_ks_services:
+  - name: "doni"
+    type: "inventory"
+    description: "doni inventory management service"
+    endpoints:
+      - {'interface': 'admin', 'url': '{{ doni_admin_endpoint }}'}
+      - {'interface': 'internal', 'url': '{{ doni_internal_endpoint }}'}
+      - {'interface': 'public', 'url': '{{ doni_public_endpoint }}'}
+
+doni_ks_users:
+  - project: "service"
+    user: "{{ doni_keystone_user }}"
+    password: "{{ doni_keystone_password }}"
+    role: "admin"

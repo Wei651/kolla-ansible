@@ -1,0 +1,21 @@
+---
+- name: Running doni bootstrap container
+  vars:
+    doni_api: "{{ doni_services['doni-api'] }}"
+  become: true
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ doni_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_doni"
+    restart_policy: no
+    volumes: "{{ doni_api.volumes|reject('equalto', '')|list }}"
+  run_once: True
+  delegate_to: "{{ groups[doni_api.group][0] }}"
+  when: inventory_hostname in groups[doni_api.group]

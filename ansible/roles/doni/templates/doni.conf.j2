@@ -1,0 +1,103 @@
+[DEFAULT]
+debug = {{ doni_logging_debug }}
+
+log_dir = /var/log/kolla/doni
+
+transport_url = {{ rpc_transport_url }}
+
+my_ip = {{ api_interface_address }}
+
+[oslo_messaging_notifications]
+transport_url = {{ notify_transport_url }}
+{% if doni_enabled_notification_topics %}
+driver = messagingv2
+topics = {{ doni_enabled_notification_topics | map(attribute='name') | join(',') }}
+{% else %}
+driver = noop
+{% endif %}
+
+{% if doni_policy_file is defined %}
+[oslo_policy]
+policy_file = {{ doni_policy_file }}
+{% endif %}
+
+{% if service_name == 'doni-api' %}
+[api]
+host_ip = {{ api_interface_address }}
+port = {{ doni_api_listen_port }}
+api_workers = {{ openstack_service_workers }}
+{% endif %}
+
+{% if service_name == 'doni-worker' %}
+[worker]
+; TODO
+{% endif %}
+
+[database]
+connection = mysql+pymysql://{{ doni_database_user }}:{{ doni_database_password }}@{{ doni_database_address }}/{{ doni_database_name }}
+connection_recycle_time = {{ database_connection_recycle_time }}
+max_pool_size = {{ database_max_pool_size }}
+max_retries = -1
+
+{% if enable_keystone | bool %}
+[keystone_authtoken]
+www_authenticate_uri = {{ keystone_internal_url }}
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = {{ default_project_domain_id }}
+user_domain_id = {{ default_user_domain_id }}
+project_name = service
+username = {{ doni_keystone_user }}
+password = {{ doni_keystone_password }}
+region_name = {{ openstack_region_name }}
+valid_interfaces = internal
+
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = {{ memcache_secret_key }}
+memcached_servers = {% for host in groups['memcached'] %}{{ 'api' | kolla_address(host) | put_address_in_context('memcache') }}:{{ memcached_port }}{% if not loop.last %},{% endif %}{% endfor %}
+{% endif %}
+
+{% if enable_ironic | bool %}
+[ironic]
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ doni_keystone_user }}
+password = {{ doni_keystone_password }}
+region_name = {{ openstack_region_name }}
+valid_interfaces = internal
+{% endif %}
+
+{% if enable_blazar | bool %}
+[blazar]
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ doni_keystone_user }}
+password = {{ doni_keystone_password }}
+region_name = {{ openstack_region_name }}
+valid_interfaces = internal
+{% endif %}
+
+[service_catalog]
+{% if enable_keystone | bool %}
+auth_url = {{ keystone_admin_url }}
+auth_type = password
+project_domain_id = default
+user_domain_id = default
+project_name = service
+username = {{ doni_keystone_user }}
+password = {{ doni_keystone_password }}
+region_name = {{ openstack_region_name }}
+valid_interfaces = internal
+{% else %}
+auth_type = none
+endpoint_override = {{ internal_protocol }}://{{ doni_internal_fqdn | put_address_in_context('url') }}:{{ doni_api_port }}
+{% endif %}
+
+[oslo_middleware]
+enable_proxy_headers_parsing = True

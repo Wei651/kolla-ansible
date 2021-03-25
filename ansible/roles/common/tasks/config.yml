@@ -191,6 +191,7 @@
       - { name: "collectd", enabled: "{{ enable_collectd | bool }}" }
       - { name: "cyborg", enabled: "{{ enable_cyborg | bool }}" }
       - { name: "designate", enabled: "{{ enable_designate | bool }}" }
+      - { name: "doni", enabled: "{{ enable_doni | bool }}" }
       - { name: "elasticsearch", enabled: "{{ enable_elasticsearch | bool }}" }
       - { name: "etcd", enabled: "{{ enable_etcd | bool }}" }
       - { name: "fluentd", enabled: "{{ enable_fluentd | bool }}" }

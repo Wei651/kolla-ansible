@@ -214,7 +214,6 @@
 #default_container_healthcheck_retries: 3
 #default_container_healthcheck_start_period: 5
 
-
 #############
 # TLS options
 #############
@@ -310,8 +309,8 @@
 #enable_cyborg: "no"
 #enable_designate: "no"
 #enable_destroy_images: "no"
+#enable_doni: "no"
 #enable_elasticsearch: "{{ 'yes' if enable_central_logging | bool or enable_osprofiler | bool or enable_skydive | bool or enable_monasca | bool or (enable_cloudkitty | bool and cloudkitty_storage_backend == 'elasticsearch') else 'no' }}"
-#enable_elasticsearch_curator: "no"
 #enable_etcd: "no"
 #enable_fluentd: "yes"
 #enable_freezer: "no"
@@ -477,7 +476,6 @@
 # 3600(1 hour), 7200(2 hour), 10800(3 hour), 14400(4 hour), 21600(6 hour),
 # 28800(8 hour), 43200(12 hour), 86400(1 day), 604800(1 week).
 #fernet_token_expiry: 86400
-
 
 ########################
 # Glance - Image Options
