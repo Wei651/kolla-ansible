@@ -34,5 +34,4 @@
     - neutron_bridge_patches is defined
     - neutron_bridge_patches | length
     - item is search(":")
-  with_together:
-    - "{{ neutron_bridge_patches.split(',') }}"
+  with_items: "{{ neutron_bridge_patches.split(',') }}"
