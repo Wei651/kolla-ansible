@@ -29,6 +29,7 @@ config_strategy: "COPY_ALWAYS"
 
 # Valid options are ['centos', 'debian', 'rhel', 'ubuntu']
 kolla_base_distro: "centos"
+kolla_base_distro_major_version: "{{ ansible_distribution_major_version }}"
 # Valid options are [ binary, source ]
 kolla_install_type: "binary"
 
@@ -1179,9 +1180,9 @@ influxdb_address: "{{ kolla_internal_fqdn }}"
 # Internal Image options
 #########################
 distro_python_version_map: {
-  "centos": "{{ '3.6' if ansible_distribution_major_version is version(8, '>=') else '2.7' }}",
+  "centos": "{{ '3.6' if (ansible_distribution_major_version is version(8, '>=') or kolla_base_distro_major_version is version(8, '>=')) else '2.7' }}",
   "debian": "3.7",
-  "rhel": "{{ '3.6' if ansible_distribution_major_version is version(8, '>=') else '2.7' }}",
+  "rhel": "{{ '3.6' if (ansible_distribution_major_version is version(8, '>=') or kolla_base_distro_major_version is version(8, '>=')) else '2.7' }}",
   "ubuntu": "3.6"
 }
 
