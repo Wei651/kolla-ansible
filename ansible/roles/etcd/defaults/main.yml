@@ -17,6 +17,7 @@ etcd_services:
       ETCD_INITIAL_CLUSTER: "{% for host in groups['etcd'] %}{{ hostvars[host]['ansible_hostname'] }}={{ etcd_protocol }}://{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}"
       ETCD_INITIAL_CLUSTER_STATE: "new"
       ETCD_OUT_FILE: "/var/log/kolla/etcd/etcd.log"
+      ETCD_UNSUPPORTED_ARCH: "{{ ansible_architecture if ansible_architecture in ['armv7l', 'aarch64'] else '' }}"
       KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
     image: "{{ etcd_image_full }}"
     volumes: "{{ etcd_default_volumes + etcd_extra_volumes }}"
