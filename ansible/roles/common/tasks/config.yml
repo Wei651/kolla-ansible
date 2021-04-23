@@ -208,6 +208,7 @@
       - { name: "opendaylight", enabled: "{{ enable_opendaylight | bool }}" }
       - { name: "outward-rabbitmq", enabled: "{{ enable_outward_rabbitmq | bool }}" }
       - { name: "panko", enabled: "{{ enable_panko | bool }}" }
+      - { name: "placement", enabled: "{{ enable_placement | bool }}" }
       - { name: "qinling", enabled: "{{ enable_qinling | bool }}" }
       - { name: "rabbitmq", enabled: "{{ enable_rabbitmq | bool }}" }
       - { name: "rally", enabled: "{{ enable_rally | bool }}" }
