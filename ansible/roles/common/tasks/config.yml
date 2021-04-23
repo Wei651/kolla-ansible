@@ -197,7 +197,10 @@
       - { name: "fluentd", enabled: "{{ enable_fluentd | bool }}" }
       - { name: "freezer", enabled: "{{ enable_freezer | bool }}" }
       - { name: "glance", enabled: "{{ enable_glance | bool }}" }
-      - { name: "glance-tls-proxy", enabled: "{{ glance_enable_tls_backend | bool }}" }
+      - {
+          name: "glance-tls-proxy",
+          enabled: "{{ glance_enable_tls_backend | bool }}",
+        }
       - { name: "gnocchi", enabled: "{{ enable_gnocchi | bool }}" }
       - { name: "grafana", enabled: "{{ enable_grafana | bool }}" }
       - { name: "hacluster", enabled: "{{ enable_hacluster | bool }}" }
@@ -222,10 +225,14 @@
       - { name: "murano", enabled: "{{ enable_murano | bool }}" }
       - { name: "neutron", enabled: "{{ enable_neutron | bool }}" }
       - { name: "neutron-tls-proxy", enabled: "{{ neutron_enable_tls_backend |
-      bool }}" }
+            bool }}" }
       - { name: "nova", enabled: "{{ enable_nova | bool }}" }
       - { name: "octavia", enabled: "{{ enable_octavia | bool }}" }
-      - { name: "outward-rabbitmq", enabled: "{{ enable_outward_rabbitmq | bool }}" }
+      - {
+          name: "outward-rabbitmq",
+          enabled: "{{ enable_outward_rabbitmq | bool }}",
+        }
+      - { name: "placement", enabled: "{{ enable_placement | bool }}" }
       - { name: "rabbitmq", enabled: "{{ enable_rabbitmq | bool }}" }
       - { name: "sahara", enabled: "{{ enable_sahara | bool }}" }
       - { name: "senlin", enabled: "{{ enable_senlin | bool }}" }
