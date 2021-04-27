@@ -5,7 +5,7 @@
   become: true
   kolla_docker:
     action: "start_container"
-    common_options: "{{ docker_common_options }}"
+    common_options: "{{ zun_docker_common_options }}"
     detach: False
     environment:
       KOLLA_BOOTSTRAP:
