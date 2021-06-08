@@ -102,6 +102,7 @@ zun_compute_default_volumes:
   - "/lib/modules:/lib/modules:ro"
   - "/dev:/dev"
   - "{% if enable_iscsid | bool %}iscsi_info:/etc/iscsi{% endif %}"
+  - "/var/lib/zun:/var/lib/zun"
 
 zun_extra_volumes: "{{ default_extra_volumes }}"
 zun_api_extra_volumes: "{{ zun_extra_volumes }}"
