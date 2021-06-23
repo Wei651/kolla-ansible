@@ -57,5 +57,7 @@
     - blazar_host_aggregate.stderr.find('already') == -1
   run_once: True
   delegate_to: "{{ groups['blazar-api'][0] }}"
+  when:
+    - enable_nova | bool
 
 - import_tasks: bootstrap_service.yml
