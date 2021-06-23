@@ -45,5 +45,7 @@
       name: "{{ blazar_aggregate_pool_name }}"
   run_once: True
   delegate_to: "{{ groups['blazar-api'][0] }}"
+  when:
+    - enable_nova | bool
 
 - import_tasks: bootstrap_service.yml
