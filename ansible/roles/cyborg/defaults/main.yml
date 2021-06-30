@@ -106,7 +106,7 @@ cyborg_enabled_notification_topics: "{{ cyborg_notification_topics | selectattr(
 ####################
 cyborg_ks_services:
   - name: "cyborg"
-    type: "cyborg"
+    type: "accelerator"
     description: "OpenStack Cyborg Service"
     endpoints:
       - {'interface': 'admin', 'url': '{{ cyborg_admin_endpoint }}'}
