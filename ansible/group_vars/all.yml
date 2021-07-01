@@ -262,6 +262,7 @@ cloudkitty_api_port: "8889"
 collectd_udp_port: "25826"
 
 cyborg_api_port: "6666"
+cyborg_api_listen_port: "{{ cyborg_api_port }}"
 
 designate_internal_fqdn: "{{ kolla_internal_fqdn }}"
 designate_external_fqdn: "{{ kolla_external_fqdn }}"

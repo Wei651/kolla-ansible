@@ -9,6 +9,19 @@ cyborg_services:
     image: "{{ cyborg_api_image_full }}"
     volumes: "{{ cyborg_api_default_volumes + cyborg_api_extra_volumes }}"
     dimensions: "{{ cyborg_api_dimensions }}"
+    haproxy:
+      cyborg_api:
+        enabled: "{{ enable_cyborg }}"
+        mode: "http"
+        external: false
+        port: "{{ cyborg_api_port }}"
+        listen_port: "{{ cyborg_api_listen_port }}"
+      cyborg_api_external:
+        enabled: "{{ enable_cyborg }}"
+        mode: "http"
+        external: true
+        port: "{{ cyborg_api_port }}"
+        listen_port: "{{ cyborg_api_listen_port }}"
   cyborg-agent:
     container_name: cyborg_agent
     group: cyborg-agent
