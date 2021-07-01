@@ -115,6 +115,14 @@ cyborg_notification_topics:
 cyborg_enabled_notification_topics: "{{ cyborg_notification_topics | selectattr('enabled', 'equalto', true) | list }}"
 
 ####################
+# Kolla
+####################
+cyborg_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
+cyborg_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
+cyborg_dev_mode: "{{ kolla_dev_mode }}"
+cyborg_source_version: "{{ kolla_source_version }}"
+
+####################
 # Keystone
 ####################
 cyborg_ks_services:
