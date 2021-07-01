@@ -10,6 +10,19 @@ cyborg_services:
     volumes: "{{ cyborg_api_default_volumes + cyborg_api_extra_volumes }}"
     dimensions: "{{ cyborg_api_dimensions }}"
     healthcheck: "{{ cyborg_api_healthcheck }}"
+    haproxy:
+      cyborg_api:
+        enabled: "{{ enable_cyborg }}"
+        mode: "http"
+        external: false
+        port: "{{ cyborg_api_port }}"
+        listen_port: "{{ cyborg_api_listen_port }}"
+      cyborg_api_external:
+        enabled: "{{ enable_cyborg }}"
+        mode: "http"
+        external: true
+        port: "{{ cyborg_api_port }}"
+        listen_port: "{{ cyborg_api_listen_port }}"
   cyborg-agent:
     container_name: cyborg_agent
     group: cyborg-agent
@@ -61,7 +74,11 @@ cyborg_api_enable_healthchecks: "{{ enable_container_healthchecks }}"
 cyborg_api_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 cyborg_api_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 cyborg_api_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-cyborg_api_healthcheck_test: ["CMD-SHELL", "healthcheck_curl http://{{ api_interface_address |  put_address_in_context('url') }}:{{ cyborg_api_port }}"]
+cyborg_api_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl http://{{ api_interface_address |  put_address_in_context('url') }}:{{ cyborg_api_port }}",
+  ]
 cyborg_api_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 cyborg_api_healthcheck:
   interval: "{{ cyborg_api_healthcheck_interval }}"
@@ -74,7 +91,8 @@ cyborg_agent_enable_healthchecks: "{{ enable_container_healthchecks }}"
 cyborg_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 cyborg_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 cyborg_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-cyborg_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port cyborg-agent {{ om_rpc_port }}"]
+cyborg_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port cyborg-agent {{ om_rpc_port }}"]
 cyborg_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 cyborg_agent_healthcheck:
   interval: "{{ cyborg_agent_healthcheck_interval }}"
@@ -87,7 +105,8 @@ cyborg_conductor_enable_healthchecks: "{{ enable_container_healthchecks }}"
 cyborg_conductor_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 cyborg_conductor_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 cyborg_conductor_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-cyborg_conductor_healthcheck_test: ["CMD-SHELL", "healthcheck_port cyborg-conductor {{ om_rpc_port }}"]
+cyborg_conductor_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port cyborg-conductor {{ om_rpc_port }}"]
 cyborg_conductor_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 cyborg_conductor_healthcheck:
   interval: "{{ cyborg_conductor_healthcheck_interval }}"
@@ -133,7 +152,6 @@ cyborg_keystone_user: "cyborg"
 
 openstack_cyborg_auth: "{{ openstack_auth }}"
 
-
 ####################
 # Notifications
 ####################
@@ -151,9 +169,9 @@ cyborg_ks_services:
     type: "accelerator"
     description: "OpenStack Cyborg Service"
     endpoints:
-      - {'interface': 'admin', 'url': '{{ cyborg_admin_endpoint }}'}
-      - {'interface': 'internal', 'url': '{{ cyborg_internal_endpoint }}'}
-      - {'interface': 'public', 'url': '{{ cyborg_public_endpoint }}'}
+      - { "interface": "admin", "url": "{{ cyborg_admin_endpoint }}" }
+      - { "interface": "internal", "url": "{{ cyborg_internal_endpoint }}" }
+      - { "interface": "public", "url": "{{ cyborg_public_endpoint }}" }
 
 cyborg_ks_users:
   - project: "service"
