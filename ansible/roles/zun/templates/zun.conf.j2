@@ -96,6 +96,11 @@ region_name = {{ openstack_region_name }}
 endpoint_type = internalURL
 ca_file = {{ openstack_cacert }}
 
+[cyborg_client]
+region_name = {{ openstack_region_name }}
+endpoint_type = internalURL
+ca_file = {{ openstack_cacert }}
+
 {% if enable_osprofiler | bool %}
 [profiler]
 enabled = true
