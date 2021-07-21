@@ -30,7 +30,7 @@
   local_action:
     module: find
     path: "{{ node_custom_config }}/prometheus/"
-    pattern: "*.rules"
+    pattern: "*.rules.yml"
   run_once: True
   register: prometheus_alert_rules
   when:
