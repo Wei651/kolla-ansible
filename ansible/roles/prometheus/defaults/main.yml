@@ -16,7 +16,7 @@ prometheus_services:
         external: false
         port: "{{ prometheus_port }}"
       prometheus_server_external:
-        enabled: "{{ enable_prometheus_external }}"
+        enabled: "{{ enable_prometheus_external | bool }}"
         mode: "http"
         external: true
         port: "{{ prometheus_port }}"
