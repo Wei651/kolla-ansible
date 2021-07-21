@@ -15,7 +15,7 @@
         }
 {% if enable_prometheus_alertmanager | bool %}
         ,{
-            "source": "{{ container_config_directory }}/*.rules",
+            "source": "{{ container_config_directory }}/*.rules.yml",
             "dest": "/etc/prometheus/",
             "optional": true,
             "owner": "prometheus",

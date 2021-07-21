@@ -32,7 +32,7 @@
 - name: Find custom prometheus alert rules files
   find:
     path: "{{ node_custom_config }}/prometheus/"
-    pattern: "*.rules"
+    pattern: "*.rules.yml"
   run_once: True
   delegate_to: localhost
   register: prometheus_alert_rules
