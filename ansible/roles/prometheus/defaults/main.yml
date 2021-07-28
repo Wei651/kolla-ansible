@@ -145,6 +145,18 @@ prometheus_alertmanager_external_url: "{{ internal_protocol }}://{{ prometheus_a
 prometheus_blackbox_exporter_endpoints: []
 
 ####################
+# OpenStack
+####################
+
+# Additional arguments to pass to the exporter's run command.
+# See https://github.com/openstack-exporter/openstack-exporter#command-line-options
+# for a list of possible options. Put options as they would appear on the
+# command line, e.g.:
+#
+# prometheus_openstack_exporter_cmdline_extras: "--disable-slow-metrics"
+prometheus_openstack_exporter_cmdline_extras: ""
+
+####################
 # SNMP
 ####################
 
