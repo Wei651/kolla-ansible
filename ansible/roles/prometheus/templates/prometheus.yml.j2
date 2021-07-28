@@ -27,9 +27,11 @@ scrape_configs:
 {% if enable_prometheus_node_exporter | bool %}
   - job_name: node
     static_configs:
-      - targets:
 {% for host in groups['prometheus-node-exporter'] %}
-        - '{{ host }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
+      - targets:
+          - '{{ host }}:{{ hostvars[host]['prometheus_node_exporter_port'] }}'
+        labels:
+          hostname: '{{ host }}'
 {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
@@ -92,8 +94,8 @@ scrape_configs:
 {% if enable_prometheus_cadvisor | bool %}
   - job_name: cadvisor
     static_configs:
-      - targets:
 {% for host in groups["prometheus-cadvisor"] %}
+<<<<<<< HEAD
         - '{{ host }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
 {% endfor %}
     relabel_configs:
@@ -108,6 +110,12 @@ scrape_configs:
       - targets:
 {% for host in groups['fluentd'] %}
         - '{{ host }}:{{ hostvars[host]['prometheus_fluentd_integration_port'] }}'
+=======
+      - targets:
+          - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
+        labels:
+          hostname: '{{ host }}'
+>>>>>>> 0fca7d340 (Label cadvisor/node_exporter metrics with hostname)
 {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
