@@ -1,5 +1,5 @@
 {
-    "command": "/opt/prometheus_alertmanager/pushgateway --web.listen-address={{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_pushgateway_port }}",
+    "command": "/opt/prometheus_pushgateway/pushgateway --web.listen-address={{ api_interface_address | put_address_in_context('url') }}:{{ prometheus_pushgateway_port }}",
     "permissions": [
         {
             "path": "/var/log/kolla/prometheus",
