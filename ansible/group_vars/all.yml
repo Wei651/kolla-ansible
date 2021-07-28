@@ -1159,6 +1159,7 @@ enable_prometheus_external: "no"
 prometheus_server_user: "admin"
 prometheus_alertmanager_user: "admin"
 prometheus_openstack_exporter_interval: "60s"
+prometheus_openstack_exporter_timeout: "10s"
 prometheus_elasticsearch_exporter_interval: "60s"
 prometheus_cmdline_extras:
 
