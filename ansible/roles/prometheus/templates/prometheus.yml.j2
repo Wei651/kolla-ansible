@@ -159,6 +159,7 @@ scrape_configs:
         target_label: __param_target
       - source_labels: [__param_target]
         target_label: instance
+      {% set host = groups['prometheus-snmp-exporter'][0] %}
       - target_label: __address__
         replacement: '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_snmp_exporter_port'] }}'
 {% endfor %}
