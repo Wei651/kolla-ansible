@@ -54,6 +54,7 @@
       - "neutron-bgp-dragent"
       - "neutron-infoblox-ipam-agent"
       - "neutron-sriov-agent"
+      - "neutron-wireguard-agent"
   merge_configs:
     sources:
       - "{{ role_path }}/templates/neutron.conf.j2"
@@ -102,6 +103,7 @@
       - "neutron-openvswitch-agent"
       - "neutron-infoblox-ipam-agent"
       - "neutron-server"
+      - "neutron-wireguard-agent"
   merge_configs:
     sources:
       - "{{ role_path }}/templates/ml2_conf.ini.j2"
@@ -345,6 +347,7 @@
       - "neutron-server"
       - "neutron-bgp-dragent"
       - "neutron-sriov-agent"
+      - "neutron-wireguard-agent"
   template:
     src: "{{ node_custom_config }}/neutron/policy.json"
     dest: "{{ node_config_directory }}/{{ service_name }}/policy.json"

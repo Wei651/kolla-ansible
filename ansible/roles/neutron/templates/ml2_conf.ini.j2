@@ -14,10 +14,10 @@ mechanism_drivers = openvswitch,hyperv
 {% elif enable_onos | bool %}
 mechanism_drivers = onos_ml2
 {% else %}
-mechanism_drivers = openvswitch,{% if enable_ironic_neutron_agent | bool %}baremetal,{% endif %}l2population
+mechanism_drivers = {% if enable_neutron_wireguard | bool %}wireguard,{% endif %}openvswitch,{% if enable_ironic_neutron_agent | bool %}baremetal,{% endif %}l2population
 {% endif %}
 {% elif neutron_plugin_agent == "linuxbridge" %}
-mechanism_drivers = linuxbridge,{% if enable_ironic_neutron_agent | bool %}baremetal,{% endif %}l2population
+mechanism_drivers = {% if enable_neutron_wireguard | bool %}wireguard,{% endif %}linuxbridge,{% if enable_ironic_neutron_agent | bool %}baremetal,{% endif %}l2population
 {% elif neutron_plugin_agent == "opendaylight" %}
 mechanism_drivers = {{ opendaylight_mechanism_driver }}
 {% endif %}

@@ -159,6 +159,15 @@ neutron_services:
     host_in_groups: "{{ inventory_hostname in groups['ironic-neutron-agent'] }}"
     volumes: "{{ ironic_neutron_agent_default_volumes + ironic_neutron_agent_extra_volumes }}"
     dimensions: "{{ ironic_neutron_agent_dimensions }}"
+  neutron-wireguard-agent:
+    container_name: "neutron_wireguard_agent"
+    image: "{{ neutron_wireguard_agent_image_full }}"
+    enabled: "{{ enable_neutron_wireguard | bool }}"
+    privileged: True
+    host_in_groups: >-
+      {{ inventory_hostname in groups['neutron-l3-agent'] }}
+    volumes: "{{ neutron_wireguard_agent_default_volumes + neutron_wireguard_agent_extra_volumes }}"
+    dimensions: "{{ neutron_wireguard_agent_dimensions }}"
 
 ####################
 # Database
@@ -218,6 +227,10 @@ ironic_neutron_agent_image: "{{ docker_registry ~ '/' if docker_registry else ''
 ironic_neutron_agent_tag: "{{ neutron_tag }}"
 ironic_neutron_agent_image_full: "{{ ironic_neutron_agent_image }}:{{ ironic_neutron_agent_tag }}"
 
+neutron_wireguard_agent_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ neutron_install_type }}-neutron-wireguard-agent"
+neutron_wireguard_agent_tag: "{{ neutron_tag }}"
+neutron_wireguard_agent_image_full: "{{ neutron_wireguard_agent_image }}:{{ neutron_wireguard_agent_tag }}"
+
 # TODO(wszumski): This is a workaround for: https://bugs.launchpad.net/oslo.rootwrap/+bug/1760471
 # and should be removed once we use python 3 for all distibutions.
 neutron_agent_dimensions_python2:
@@ -242,6 +255,7 @@ neutron_infoblox_ipam_agent_dimensions: "{{ default_container_dimensions }}"
 neutron_openvswitch_agent_xenapi_dimensions: "{{ neutron_agent_dimensions }}"
 neutron_metering_agent_dimensions: "{{ neutron_agent_dimensions }}"
 ironic_neutron_agent_dimensions: "{{ default_container_dimensions }}"
+neutron_wireguard_agent_dimensions: "{{ default_container_dimensions }}"
 
 
 neutron_dhcp_agent_default_volumes:
@@ -326,6 +340,13 @@ ironic_neutron_agent_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
   - "kolla_logs:/var/log/kolla/"
+neutron_wireguard_agent_default_volumes:
+  - "{{ node_config_directory }}/neutron-wireguard-agent/:{{ container_config_directory }}/:ro"
+  - "/run/netns:/run/netns:shared"
+  - neutron_wireguard:/etc/neutron/plugins/wireguard
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla/"
 
 neutron_extra_volumes: "{{ default_extra_volumes }}"
 neutron_dhcp_agent_extra_volumes: "{{ neutron_extra_volumes }}"
@@ -340,6 +361,7 @@ neutron_infoblox_ipam_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 neutron_openvswitch_agent_xenapi_extra_volumes: "{{ neutron_extra_volumes }}"
 neutron_metering_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 ironic_neutron_agent_extra_volumes: "{{ neutron_extra_volumes }}"
+neutron_wireguard_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 
 ####################
 # OpenStack
