@@ -198,6 +198,15 @@ neutron_services:
         port: "{{ neutron_server_port }}"
         listen_port: "{{ neutron_server_listen_port }}"
         tls_backend: "yes"
+  neutron-wireguard-agent:
+    container_name: "neutron_wireguard_agent"
+    image: "{{ neutron_wireguard_agent_image_full }}"
+    enabled: "{{ enable_neutron_wireguard | bool }}"
+    privileged: True
+    host_in_groups: >-
+      {{ inventory_hostname in groups['neutron-l3-agent'] }}
+    volumes: "{{ neutron_wireguard_agent_default_volumes + neutron_wireguard_agent_extra_volumes }}"
+    dimensions: "{{ neutron_wireguard_agent_dimensions }}"
 
 ####################
 # Database
@@ -205,7 +214,6 @@ neutron_services:
 neutron_database_name: "neutron"
 neutron_database_user: "{% if use_preconfigured_databases | bool and use_common_mariadb_user | bool %}{{ database_user }}{% else %}neutron{% endif %}"
 neutron_database_address: "{{ database_address | put_address_in_context('url') }}:{{ database_port }}"
-
 
 ####################
 # Docker
@@ -273,6 +281,10 @@ neutron_tls_proxy_image: "{{ docker_registry ~ '/' if docker_registry else '' }}
 neutron_tls_proxy_tag: "{{ neutron_tag }}"
 neutron_tls_proxy_image_full: "{{ neutron_tls_proxy_image }}:{{ neutron_tls_proxy_tag }}"
 
+neutron_wireguard_agent_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ neutron_install_type }}-neutron-wireguard-agent"
+neutron_wireguard_agent_tag: "{{ neutron_tag }}"
+neutron_wireguard_agent_image_full: "{{ neutron_wireguard_agent_image }}:{{ neutron_wireguard_agent_tag }}"
+
 neutron_agent_dimensions: "{{ default_container_dimensions }}"
 
 neutron_dhcp_agent_dimensions: "{{ neutron_agent_dimensions }}"
@@ -290,12 +302,14 @@ neutron_infoblox_ipam_agent_dimensions: "{{ default_container_dimensions }}"
 neutron_metering_agent_dimensions: "{{ neutron_agent_dimensions }}"
 ironic_neutron_agent_dimensions: "{{ default_container_dimensions }}"
 neutron_tls_proxy_dimensions: "{{ default_container_dimensions }}"
+neutron_wireguard_agent_dimensions: "{{ default_container_dimensions }}"
 
 neutron_dhcp_agent_enable_healthchecks: "{{ enable_container_healthchecks }}"
 neutron_dhcp_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_dhcp_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_dhcp_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_dhcp_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port neutron-dhcp-agent {{ om_rpc_port }}"]
+neutron_dhcp_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port neutron-dhcp-agent {{ om_rpc_port }}"]
 neutron_dhcp_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_dhcp_agent_healthcheck:
   interval: "{{ neutron_dhcp_agent_healthcheck_interval }}"
@@ -308,7 +322,8 @@ neutron_l3_agent_enable_healthchecks: "{{ enable_container_healthchecks }}"
 neutron_l3_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_l3_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_l3_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_l3_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port 'neutron-l3-agent ' {{ om_rpc_port }}"]
+neutron_l3_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port 'neutron-l3-agent ' {{ om_rpc_port }}"]
 neutron_l3_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_l3_agent_healthcheck:
   interval: "{{ neutron_l3_agent_healthcheck_interval }}"
@@ -321,7 +336,8 @@ neutron_linuxbridge_agent_enable_healthchecks: "{{ enable_container_healthchecks
 neutron_linuxbridge_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_linuxbridge_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_linuxbridge_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_linuxbridge_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port neutron-linuxbridge-agent {{ om_rpc_port }}"]
+neutron_linuxbridge_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port neutron-linuxbridge-agent {{ om_rpc_port }}"]
 neutron_linuxbridge_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_linuxbridge_agent_healthcheck:
   interval: "{{ neutron_linuxbridge_agent_healthcheck_interval }}"
@@ -334,7 +350,8 @@ neutron_metadata_agent_enable_healthchecks: "{{ enable_container_healthchecks }}
 neutron_metadata_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_metadata_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_metadata_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_metadata_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port neutron-metadata-agent {{ om_rpc_port }}"]
+neutron_metadata_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port neutron-metadata-agent {{ om_rpc_port }}"]
 neutron_metadata_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_metadata_agent_healthcheck:
   interval: "{{ neutron_metadata_agent_healthcheck_interval }}"
@@ -347,7 +364,8 @@ neutron_openvswitch_agent_enable_healthchecks: "{{ enable_container_healthchecks
 neutron_openvswitch_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_openvswitch_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_openvswitch_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_openvswitch_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port neutron-openvswitch-agent {{ om_rpc_port }}"]
+neutron_openvswitch_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port neutron-openvswitch-agent {{ om_rpc_port }}"]
 neutron_openvswitch_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_openvswitch_agent_healthcheck:
   interval: "{{ neutron_openvswitch_agent_healthcheck_interval }}"
@@ -360,7 +378,8 @@ neutron_ovn_metadata_agent_enable_healthchecks: "{{ enable_container_healthcheck
 neutron_ovn_metadata_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_ovn_metadata_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_ovn_metadata_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_ovn_metadata_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port python {{ ovn_sb_db_port }}"]
+neutron_ovn_metadata_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port python {{ ovn_sb_db_port }}"]
 neutron_ovn_metadata_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_ovn_metadata_agent_healthcheck:
   interval: "{{ neutron_ovn_metadata_agent_healthcheck_interval }}"
@@ -373,7 +392,11 @@ neutron_server_enable_healthchecks: "{{ enable_container_healthchecks }}"
 neutron_server_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_server_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_server_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_server_healthcheck_test: ["CMD-SHELL", "healthcheck_curl http://{% if neutron_enable_tls_backend | bool %}localhost{% else %}{{ api_interface_address |  put_address_in_context('url') }}{% endif %}:{{ neutron_server_listen_port }}"]
+neutron_server_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl http://{% if neutron_enable_tls_backend | bool %}localhost{% else %}{{ api_interface_address |  put_address_in_context('url') }}{% endif %}:{{ neutron_server_listen_port }}",
+  ]
 neutron_server_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_server_healthcheck:
   interval: "{{ neutron_server_healthcheck_interval }}"
@@ -386,7 +409,11 @@ neutron_tls_proxy_enable_healthchecks: "{{ enable_container_healthchecks }}"
 neutron_tls_proxy_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_tls_proxy_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_tls_proxy_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_tls_proxy_healthcheck_test: ["CMD-SHELL", "healthcheck_curl -u {{ haproxy_user }}:{{ haproxy_password }} {{ api_interface_address |  put_address_in_context('url') }}:{{ neutron_tls_proxy_stats_port }}"]
+neutron_tls_proxy_healthcheck_test:
+  [
+    "CMD-SHELL",
+    "healthcheck_curl -u {{ haproxy_user }}:{{ haproxy_password }} {{ api_interface_address |  put_address_in_context('url') }}:{{ neutron_tls_proxy_stats_port }}",
+  ]
 neutron_tls_proxy_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_tls_proxy_healthcheck:
   interval: "{{ neutron_tls_proxy_healthcheck_interval }}"
@@ -399,7 +426,8 @@ neutron_sriov_agent_enable_healthchecks: "{{ enable_container_healthchecks }}"
 neutron_sriov_agent_healthcheck_interval: "{{ default_container_healthcheck_interval }}"
 neutron_sriov_agent_healthcheck_retries: "{{ default_container_healthcheck_retries }}"
 neutron_sriov_agent_healthcheck_start_period: "{{ default_container_healthcheck_start_period }}"
-neutron_sriov_agent_healthcheck_test: ["CMD-SHELL", "healthcheck_port neutron-sriov-nic-agent {{ om_rpc_port }}"]
+neutron_sriov_agent_healthcheck_test:
+  ["CMD-SHELL", "healthcheck_port neutron-sriov-nic-agent {{ om_rpc_port }}"]
 neutron_sriov_agent_healthcheck_timeout: "{{ default_container_healthcheck_timeout }}"
 neutron_sriov_agent_healthcheck:
   interval: "{{ neutron_sriov_agent_healthcheck_interval }}"
@@ -508,6 +536,13 @@ neutron_tls_proxy_default_volumes:
   - "/etc/localtime:/etc/localtime:ro"
   - "{{ '/etc/timezone:/etc/timezone:ro' if kolla_base_distro in ['debian', 'ubuntu'] else '' }}"
   - "kolla_logs:/var/log/kolla/"
+neutron_wireguard_agent_default_volumes:
+  - "{{ node_config_directory }}/neutron-wireguard-agent/:{{ container_config_directory }}/:ro"
+  - "/run/netns:/run/netns:shared"
+  - neutron_wireguard:/etc/neutron/plugins/wireguard
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla/"
 
 neutron_extra_volumes: "{{ default_extra_volumes }}"
 neutron_dhcp_agent_extra_volumes: "{{ neutron_extra_volumes }}"
@@ -525,6 +560,7 @@ neutron_infoblox_ipam_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 neutron_metering_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 ironic_neutron_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 neutron_tls_proxy_extra_volumes: "{{ neutron_extra_volumes }}"
+neutron_wireguard_agent_extra_volumes: "{{ neutron_extra_volumes }}"
 
 ####################
 # OpenStack
@@ -760,9 +796,9 @@ neutron_ks_services:
     type: "network"
     description: "Openstack Networking"
     endpoints:
-      - {'interface': 'admin', 'url': '{{ neutron_admin_endpoint }}'}
-      - {'interface': 'internal', 'url': '{{ neutron_internal_endpoint }}'}
-      - {'interface': 'public', 'url': '{{ neutron_public_endpoint }}'}
+      - { "interface": "admin", "url": "{{ neutron_admin_endpoint }}" }
+      - { "interface": "internal", "url": "{{ neutron_internal_endpoint }}" }
+      - { "interface": "public", "url": "{{ neutron_public_endpoint }}" }
 
 neutron_ks_users:
   - project: "service"

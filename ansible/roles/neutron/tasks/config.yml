@@ -109,6 +109,7 @@
       - "neutron-sriov-agent"
       - "neutron-mlnx-agent"
       - "neutron-eswitchd"
+      - "neutron-wireguard-agent"
   merge_configs:
     sources:
       - "{{ role_path }}/templates/neutron.conf.j2"
@@ -155,6 +156,7 @@
     services_need_ml2_conf_ini:
       - "neutron-infoblox-ipam-agent"
       - "neutron-server"
+      - "neutron-wireguard-agent"
   merge_configs:
     sources:
       - "{{ role_path }}/templates/ml2_conf.ini.j2"
