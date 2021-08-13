@@ -28,6 +28,7 @@ cyborg_services:
     enabled: true
     privileged: true
     image: "{{ cyborg_agent_image_full }}"
+    environment: "{{ cyborg_agent_environment }}"
     volumes: "{{ cyborg_agent_default_volumes + cyborg_agent_extra_volumes }}"
     dimensions: "{{ cyborg_agent_dimensions }}"
   cyborg-conductor:
@@ -62,6 +63,8 @@ cyborg_agent_image_full: "{{ cyborg_agent_image }}:{{ cyborg_agent_tag }}"
 cyborg_conductor_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ cyborg_install_type }}-cyborg-conductor"
 cyborg_conductor_tag: "{{ cyborg_tag }}"
 cyborg_conductor_image_full: "{{ cyborg_conductor_image }}:{{ cyborg_conductor_tag }}"
+
+cyborg_agent_environment: {}
 
 cyborg_api_dimensions: "{{ default_container_dimensions }}"
 cyborg_agent_dimensions: "{{ default_container_dimensions }}"
