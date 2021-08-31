@@ -9,6 +9,10 @@ LoadModule ssl_module /usr/lib/apache2/modules/mod_ssl.so
 {% endif %}
 Listen {{ api_interface_address | put_address_in_context('url') }}:{{ horizon_listen_port }}
 
+{% if horizon_redirect_root is defined and kolla_base_distro in ['debian', 'ubuntu'] %}
+LoadModule rewrite_module /usr/lib/apache2/modules/mod_rewrite.so
+{% endif %}
+
 ServerSignature Off
 ServerTokens Prod
 TraceEnable off
