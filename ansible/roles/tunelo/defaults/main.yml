@@ -1,0 +1,101 @@
+---
+project_name: "tunelo"
+
+tunelo_services:
+  tunelo-api:
+    container_name: tunelo_api
+    group: tunelo-api
+    enabled: true
+    image: "{{ tunelo_api_image_full }}"
+    volumes: "{{ tunelo_api_default_volumes + tunelo_api_extra_volumes }}"
+    dimensions: "{{ tunelo_api_dimensions }}"
+    haproxy:
+      tunelo_api:
+        enabled: "{{ enable_tunelo }}"
+        mode: "http"
+        external: false
+        port: "{{ tunelo_api_port }}"
+        listen_port: "{{ tunelo_api_listen_port }}"
+      tunelo_api_external:
+        enabled: "{{ enable_tunelo }}"
+        mode: "http"
+        external: true
+        port: "{{ tunelo_api_port }}"
+        listen_port: "{{ tunelo_api_listen_port }}"
+
+
+####################
+# Docker
+####################
+tunelo_install_type: "{{ kolla_install_type }}"
+tunelo_tag: "{{ openstack_tag }}"
+
+tunelo_api_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ tunelo_install_type }}-tunelo-api"
+tunelo_api_tag: "{{ tunelo_tag }}"
+tunelo_api_image_full: "{{ tunelo_api_image }}:{{ tunelo_api_tag }}"
+
+tunelo_api_dimensions: "{{ default_container_dimensions }}"
+
+tunelo_api_default_volumes:
+  - "{{ node_config_directory }}/tunelo-api/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla"
+  - "{{ kolla_dev_repos_directory ~ '/tunelo/tunelo:/var/lib/kolla/venv/lib/python' ~ distro_python_version ~ '/site-packages/tunelo' if tunelo_dev_mode | bool else '' }}"
+
+tunelo_extra_volumes: "{{ default_extra_volumes }}"
+tunelo_api_extra_volumes: "{{ tunelo_extra_volumes }}"
+
+####################
+# OpenStack
+####################
+tunelo_admin_endpoint: "{{ admin_protocol }}://{{ tunelo_internal_fqdn | put_address_in_context('url') }}:{{ tunelo_api_port }}"
+tunelo_internal_endpoint: "{{ internal_protocol }}://{{ tunelo_internal_fqdn | put_address_in_context('url') }}:{{ tunelo_api_port }}"
+tunelo_public_endpoint: "{{ public_protocol }}://{{ tunelo_external_fqdn | put_address_in_context('url') }}:{{ tunelo_api_port }}"
+
+tunelo_logging_debug: "{{ openstack_logging_debug }}"
+
+tunelo_keystone_user: "tunelo"
+
+openstack_tunelo_auth: "{{ openstack_auth }}"
+
+
+#########
+# tunelo
+#########
+
+####################
+## Kolla
+#####################
+tunelo_git_repository: "{{ kolla_dev_repos_git }}/{{ project_name }}"
+tunelo_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
+tunelo_dev_mode: "{{ kolla_dev_mode }}"
+tunelo_source_version: "{{ kolla_source_version }}"
+
+
+####################
+# Notifications
+####################
+tunelo_notification_topics:
+  - name: notifications
+    enabled: "{{ enable_ceilometer | bool }}"
+
+tunelo_enabled_notification_topics: "{{ tunelo_notification_topics | selectattr('enabled', 'equalto', true) | list }}"
+
+####################
+# Keystone
+####################
+tunelo_ks_services:
+  - name: "tunelo"
+    type: "channel"
+    description: "tunelo channel management service"
+    endpoints:
+      - {'interface': 'admin', 'url': '{{ tunelo_admin_endpoint }}'}
+      - {'interface': 'internal', 'url': '{{ tunelo_internal_endpoint }}'}
+      - {'interface': 'public', 'url': '{{ tunelo_public_endpoint }}'}
+
+tunelo_ks_users:
+  - project: "service"
+    user: "{{ tunelo_keystone_user }}"
+    password: "{{ tunelo_keystone_password }}"
+    role: "admin"

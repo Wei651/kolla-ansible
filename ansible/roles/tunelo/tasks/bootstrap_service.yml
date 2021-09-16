@@ -1,0 +1,21 @@
+---
+- name: Running tunelo bootstrap container
+  vars:
+    tunelo_api: "{{ tunelo_services['tunelo-api'] }}"
+  become: true
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    detach: False
+    environment:
+      KOLLA_BOOTSTRAP:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+    image: "{{ tunelo_api.image }}"
+    labels:
+      BOOTSTRAP:
+    name: "bootstrap_tunelo"
+    restart_policy: no
+    volumes: "{{ tunelo_api.volumes|reject('equalto', '')|list }}"
+  run_once: True
+  delegate_to: "{{ groups[tunelo_api.group][0] }}"
+  when: inventory_hostname in groups[tunelo_api.group]
