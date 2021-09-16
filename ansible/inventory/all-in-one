@@ -799,3 +799,9 @@ doni
 
 [doni-worker:children]
 doni
+
+[tunelo:children]
+control
+
+[tunelo-api:children]
+tunelo

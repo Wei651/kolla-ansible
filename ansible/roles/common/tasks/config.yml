@@ -222,6 +222,7 @@
       - { name: "tacker", enabled: "{{ enable_tacker | bool }}" }
       - { name: "tempest", enabled: "{{ enable_tempest | bool }}" }
       - { name: "trove", enabled: "{{ enable_trove | bool }}" }
+      - { name: "tunelo", enabled: "{{ enable_tunelo | bool }}" }
       - { name: "vitrage", enabled: "{{ enable_vitrage | bool }}" }
       - { name: "watcher", enabled: "{{ enable_watcher | bool }}" }
       - { name: "zookeeper", enabled: "{{ enable_zookeeper | bool }}" }

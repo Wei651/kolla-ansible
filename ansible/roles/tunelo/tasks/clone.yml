@@ -1,0 +1,7 @@
+---
+- name: Cloning tunelo source repository for development
+  git:
+    repo: "{{ tunelo_git_repository }}"
+    dest: "{{ kolla_dev_repos_directory }}/{{ project_name }}"
+    update: "{{ tunelo_dev_repos_pull }}"
+    version: "{{ tunelo_source_version }}"

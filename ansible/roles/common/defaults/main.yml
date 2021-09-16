@@ -182,6 +182,8 @@ fluentd_input_openstack_services:
     enabled: "{{ enable_tacker | bool }}"
   - name: trove
     enabled: "{{ enable_trove | bool }}"
+  - name: tunelo
+    enabled: "{{ enable_tunelo | bool }}"
   - name: watcher
     enabled: "{{ enable_watcher | bool }}"
   - name: zun

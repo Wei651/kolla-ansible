@@ -492,6 +492,11 @@ tacker_server_port: "9890"
 
 trove_api_port: "8779"
 
+tunelo_internal_fqdn: "{{ kolla_internal_fqdn }}"
+tunelo_external_fqdn: "{{ kolla_external_fqdn }}"
+tunelo_api_port: "8101"
+tunelo_api_listen_port: "{{ tunelo_api_port }}"
+
 watcher_api_port: "9322"
 
 zookeeper_client_port: "2181"
@@ -719,6 +724,7 @@ enable_telegraf: "no"
 enable_tempest: "no"
 enable_trove: "no"
 enable_trove_singletenant: "no"
+enable_tunelo: "no"
 enable_vitrage: "no"
 enable_vmtp: "no"
 enable_watcher: "no"
