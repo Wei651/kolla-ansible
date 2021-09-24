@@ -3,8 +3,9 @@
 server {{ kolla_internal_vip_address }} iburst
 {% if external_ntp_pool %}
 pool {{ external_ntp_pool }} iburst
+{% endif %}
 {# NOTE(jeffrey4l): external_ntp_servers may be None here #}
-{% elif external_ntp_servers %}
+{% if external_ntp_servers %}
 {% for ntp_server in external_ntp_servers %}
 server {{ ntp_server }} iburst
 {% endfor %}
