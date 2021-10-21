@@ -473,6 +473,8 @@ prometheus_blackbox_exporter_port: "9115"
 
 prometheus_snmp_exporter_port: "9116"
 
+prometheus_ipmi_exporter_port: "9290"
+
 qdrouterd_port: "31459"
 
 rabbitmq_port: "{{ '5671' if rabbitmq_enable_tls | bool else '5672' }}"
@@ -1138,6 +1140,7 @@ enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_rabbitmq_exporter: "{{ enable_prometheus | bool and enable_rabbitmq | bool }}"
 enable_prometheus_snmp_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_jupyterhub_exporter: "{{ enable_jupyterhub | bool and enable_prometheus | bool }}"
+enable_prometheus_ipmi_exporter: "{{ enable_prometheus | bool }}"
 
 enable_prometheus_external: "no"
 

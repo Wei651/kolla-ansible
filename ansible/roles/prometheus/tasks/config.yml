@@ -271,3 +271,21 @@
     - prometheus_snmp_exporter_generator_config.changed
   notify:
     - Restart prometheus-snmp-exporter container
+
+- name: Copying config file for IPMI exporter
+  become: true
+  vars:
+    service: "{{ prometheus_services['prometheus-ipmi-exporter'] }}"
+  template:
+    src: "{{ item }}"
+    dest: "{{ node_config_directory }}/prometheus-ipmi-exporter/prometheus-ipmi-exporter.yml"
+    mode: "0660"
+  when:
+    - inventory_hostname in groups[service.group]
+    - service.enabled | bool
+  with_first_found:
+    - "{{ node_custom_config }}/prometheus/{{ inventory_hostname }}/prometheus-ipmi-exporter.yml"
+    - "{{ node_custom_config }}/prometheus/prometheus-ipmi-exporter.yml"
+    - "{{ role_path }}/templates/prometheus-ipmi-exporter.yml.j2"
+  notify:
+    - Restart prometheus-ipmi-exporter container

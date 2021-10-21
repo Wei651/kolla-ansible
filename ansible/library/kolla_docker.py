@@ -465,12 +465,13 @@ class DockerWorker(object):
         new_labels = self.params.get('labels')
         current_labels = container_info['Config'].get('Labels', dict())
         image_labels = self.check_image().get('Labels', dict())
-        for k, v in image_labels.items():
-            if k in new_labels:
-                if v != new_labels[k]:
-                    return True
-            else:
-                del current_labels[k]
+        if image_labels:
+            for k, v in image_labels.items():
+                if k in new_labels:
+                    if v != new_labels[k]:
+                        return True
+                else:
+                    del current_labels[k]
 
         if new_labels != current_labels:
             return True

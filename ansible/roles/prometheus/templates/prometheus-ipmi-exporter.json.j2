@@ -1,0 +1,18 @@
+{
+    "command": "/opt/ipmi_exporter/ipmi_exporter --config.file=/etc/prometheus/ipmi.yml",
+    "config_files": [
+        {
+            "source": "{{ container_config_directory }}/prometheus-ipmi-exporter.yml",
+            "dest": "/etc/prometheus/ipmi.yml",
+            "owner": "prometheus",
+            "perm": "0600"
+        }
+    ],
+    "permissions": [
+        {
+            "path": "/var/log/kolla/prometheus",
+            "owner": "prometheus:kolla",
+            "recurse": true
+        }
+    ]
+}
