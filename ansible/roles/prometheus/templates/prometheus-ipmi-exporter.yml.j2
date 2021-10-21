@@ -1,0 +1,16 @@
+---
+modules:
+{% for module in prometheus_ipmi_exporter_modules %}
+  {{ module.name }}:
+    user: "{{ module.user }}"
+    pass: "{{ module.password }}"
+    driver: "LAN_2_0"
+    privilege: "user"
+    timeout: 10000
+
+    # If _not_ specified, bmc, ipmi, chassis, and dcmi are used
+    collectors:
+{% for collector in module.collectors %}
+      - {{ collector }}
+{% endfor %}    
+{% endfor %}

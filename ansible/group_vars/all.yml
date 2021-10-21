@@ -437,6 +437,8 @@ prometheus_blackbox_exporter_port: "9115"
 
 prometheus_snmp_exporter_port: "9116"
 
+prometheus_ipmi_exporter_port: "9290"
+
 qdrouterd_port: "31459"
 
 qinling_api_port: "7070"
@@ -1161,6 +1163,7 @@ enable_prometheus_elasticsearch_exporter: "{{ enable_prometheus | bool and enabl
 enable_prometheus_blackbox_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_snmp_exporter: "{{ enable_prometheus | bool }}"
 enable_prometheus_jupyterhub_exporter: "{{ enable_jupyterhub | bool and enable_prometheus | bool }}"
+enable_prometheus_ipmi_exporter: "{{ enable_prometheus | bool }}"
 
 enable_prometheus_external: "no"
 

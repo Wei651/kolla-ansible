@@ -115,6 +115,13 @@ prometheus_services:
     image: "{{ prometheus_snmp_exporter_image_full }}"
     volumes: "{{ prometheus_snmp_exporter_default_volumes + prometheus_snmp_exporter_extra_volumes }}"
     dimensions: "{{ prometheus_snmp_exporter_dimensions }}"
+  prometheus-ipmi-exporter:
+    container_name: "prometheus_ipmi_exporter"
+    group: "prometheus-ipmi-exporter"
+    enabled: "{{ enable_prometheus_ipmi_exporter | bool }}"
+    image: "{{ prometheus_ipmi_exporter_image_full }}"
+    volumes: "{{ prometheus_ipmi_exporter_default_volumes + prometheus_ipmi_exporter_extra_volumes }}"
+    dimensions: "{{ prometheus_ipmi_exporter_dimensions }}"
 
 ####################
 # Database
@@ -166,6 +173,12 @@ prometheus_openstack_exporter_cmdline_extras: ""
 #       - '10.0.0.1'
 #       - '10.0.0.2'
 prometheus_snmp_exporter_modules: []
+
+####################
+# IPMI
+####################
+
+prometheus_ipmi_exporter_endpoints: []
 
 ####################
 # Docker
@@ -225,6 +238,10 @@ prometheus_snmp_exporter_generator_image: "{{ docker_registry ~ '/' if docker_re
 prometheus_snmp_exporter_generator_tag: "{{ prometheus_tag }}"
 prometheus_snmp_exporter_generator_image_full: "{{ prometheus_snmp_exporter_generator_image }}:{{ prometheus_snmp_exporter_generator_tag }}"
 
+prometheus_ipmi_exporter_image: "{{ docker_registry ~ '/' if docker_registry else '' }}{{ docker_namespace }}/{{ kolla_base_distro }}-{{ prometheus_install_type }}-prometheus-ipmi-exporter"
+prometheus_ipmi_exporter_tag: "{{ prometheus_tag }}"
+prometheus_ipmi_exporter_image_full: "{{ prometheus_ipmi_exporter_image }}:{{ prometheus_ipmi_exporter_tag }}"
+
 prometheus_server_dimensions: "{{ default_container_dimensions }}"
 prometheus_pushgateway_dimensions: "{{ default_container_dimensions }}"
 prometheus_haproxy_exporter_dimensions: "{{ default_container_dimensions }}"
@@ -237,6 +254,7 @@ prometheus_openstack_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_elasticsearch_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_blackbox_exporter_dimensions: "{{ default_container_dimensions }}"
 prometheus_snmp_exporter_dimensions: "{{ default_container_dimensions }}"
+prometheus_ipmi_exporter_dimensions: "{{ default_container_dimensions }}"
 
 prometheus_server_default_volumes:
   - "{{ node_config_directory }}/prometheus-server/:{{ container_config_directory }}/:ro"
@@ -306,6 +324,11 @@ prometheus_snmp_exporter_default_volumes:
   - "{{ node_config_directory }}/prometheus-snmp-exporter/:{{ container_config_directory }}/:ro"
   - "/etc/localtime:/etc/localtime:ro"
   - "kolla_logs:/var/log/kolla/"
+prometheus_ipmi_exporter_default_volumes:
+  - "{{ node_config_directory }}/prometheus-ipmi-exporter/:{{ container_config_directory }}/:ro"
+  - "/etc/localtime:/etc/localtime:ro"
+  - "{{ '/etc/timezone:/etc/timezone:ro' if ansible_os_family == 'Debian' else '' }}"
+  - "kolla_logs:/var/log/kolla/"
 
 prometheus_extra_volumes: "{{ default_extra_volumes }}"
 prometheus_server_extra_volumes: "{{ prometheus_extra_volumes }}"
@@ -320,3 +343,4 @@ prometheus_openstack_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_elasticsearch_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_blackbox_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
 prometheus_snmp_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
+prometheus_ipmi_exporter_extra_volumes: "{{ prometheus_extra_volumes }}"
