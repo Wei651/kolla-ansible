@@ -1,5 +1,3 @@
 ---
 - import_role:
     role: service-images-pull
-  vars:
-    docker_common_options: "{{ zun_docker_common_options }}"
