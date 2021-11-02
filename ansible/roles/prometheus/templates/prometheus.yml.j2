@@ -95,7 +95,6 @@ scrape_configs:
   - job_name: cadvisor
     static_configs:
 {% for host in groups["prometheus-cadvisor"] %}
-<<<<<<< HEAD
         - '{{ host }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
 {% endfor %}
     relabel_configs:
@@ -110,12 +109,6 @@ scrape_configs:
       - targets:
 {% for host in groups['fluentd'] %}
         - '{{ host }}:{{ hostvars[host]['prometheus_fluentd_integration_port'] }}'
-=======
-      - targets:
-          - '{{ 'api' | kolla_address(host) | put_address_in_context('url') }}:{{ hostvars[host]['prometheus_cadvisor_port'] }}'
-        labels:
-          hostname: '{{ host }}'
->>>>>>> 0fca7d340 (Label cadvisor/node_exporter metrics with hostname)
 {% endfor %}
     relabel_configs:
     - source_labels: [__address__]
