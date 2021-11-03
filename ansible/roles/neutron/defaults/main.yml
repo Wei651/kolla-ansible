@@ -613,6 +613,8 @@ mechanism_drivers:
     enabled: "{{ neutron_plugin_agent == 'ovn' }}"
   - name: "sriovnicswitch"
     enabled: "{{ enable_neutron_sriov | bool }}"
+  - name: "genericswitch"
+    enabled: "{{ enable_neutron_genericswitch | bool }}"
 
 neutron_mechanism_drivers: "{{ mechanism_drivers | selectattr('enabled', 'equalto', true) | list }}"
 
