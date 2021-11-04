@@ -599,6 +599,8 @@ neutron_subprojects:
 # Mechanism drivers
 ####################
 mechanism_drivers:
+  - name: "wireguard"
+    enabled: "{{ enable_neutron_wireguard | bool }}"
   - name: "linuxbridge"
     enabled: "{{ neutron_plugin_agent == 'linuxbridge' }}"
   - name: "openvswitch"
