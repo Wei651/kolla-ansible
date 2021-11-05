@@ -43,7 +43,7 @@ zun_services:
   zun-compute:
     container_name: zun_compute
     group: zun-compute
-    enabled: true
+    enabled: "{{ enable_zun_compute }}"
     image: "{{ zun_compute_image_full }}"
     privileged: True
     volumes: "{{ zun_compute_default_volumes + zun_compute_extra_volumes }}"
@@ -52,7 +52,7 @@ zun_services:
   zun-cni-daemon:
     container_name: zun_cni_daemon
     group: zun-cni-daemon
-    enabled: true
+    enabled: "{{ enable_zun_compute }}"
     image: "{{ zun_cni_daemon_image_full }}"
     privileged: True
     volumes: "{{ zun_cni_daemon_default_volumes + zun_cni_daemon_extra_volumes }}"
