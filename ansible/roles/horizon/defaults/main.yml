@@ -126,7 +126,10 @@ horizon_external_frontend_http_extra: []
 horizon_git_repository: "https://github.com/Wei651/horizon"
 murano_dashboard_git_repository: "{{ kolla_dev_repos_git }}/murano-dashboard"
 
-horizon_dev_repos_pull: "{{ kolla_dev_repos_pull }}"
+horizon_dev_repos_pull: "https://github.com/Wei651/horizon" 
+
+# "{{ kolla_dev_repos_pull }}" By default
+
 horizon_dev_mode: "{{ kolla_dev_mode }}"
 horizon_murano_dev_mode: "{{ kolla_dev_mode }}"
 horizon_source_version: "{{ kolla_source_version }}"
